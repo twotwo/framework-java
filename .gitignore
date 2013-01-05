@@ -1,1 +1,8 @@
 /Spring-Data-JDBC/target
+/Spring-Data-JDBC/.classpath
+/Spring-Data-JDBC/.project
+/Spring-Data-JDBC/.settings
+/*/target
+/*/.classpath
+/*/.project
+/*/.settings
