@@ -3,7 +3,7 @@
  */
 package com.li3huo.mybatis;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 
@@ -53,6 +53,9 @@ public class DaoTest {
 			ProductMapper mapper = session.getMapper(ProductMapper.class);
 			Product product = mapper.selectProduct(1);
 			assertNotNull(product);
+			//INSERT INTO products (id, description, price) values(1, 'Lamp', 5.78);
+			assertEquals("Lamp", product.getDescription());
+			assertEquals(5.8, product.getPrice(), 0.1);
 		} finally {
 			session.close();
 		}

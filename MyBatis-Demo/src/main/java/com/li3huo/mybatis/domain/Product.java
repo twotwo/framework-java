@@ -8,57 +8,43 @@ package com.li3huo.mybatis.domain;
  * 
  */
 public class Product {
-	private String productid;
-	private String category;
-	private String name;
-	private String descn;
+	private int id;
+	private String description;
+	private float price;
 	/**
-	 * @return the productid
+	 * @return the id
 	 */
-	public String getProductid() {
-		return productid;
+	public int getId() {
+		return id;
 	}
 	/**
-	 * @param productid the productid to set
+	 * @param id the id to set
 	 */
-	public void setProductid(String productid) {
-		this.productid = productid;
+	public void setId(int id) {
+		this.id = id;
 	}
 	/**
-	 * @return the category
+	 * @return the description
 	 */
-	public String getCategory() {
-		return category;
+	public String getDescription() {
+		return description;
 	}
 	/**
-	 * @param category the category to set
+	 * @param description the description to set
 	 */
-	public void setCategory(String category) {
-		this.category = category;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	/**
-	 * @return the name
+	 * @return the price
 	 */
-	public String getName() {
-		return name;
+	public float getPrice() {
+		return price;
 	}
 	/**
-	 * @param name the name to set
+	 * @param price the price to set
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public void setPrice(float price) {
+		this.price = price;
 	}
-	/**
-	 * @return the descn
-	 */
-	public String getDescn() {
-		return descn;
-	}
-	/**
-	 * @param descn the descn to set
-	 */
-	public void setDescn(String descn) {
-		this.descn = descn;
-	}
-	
 }
