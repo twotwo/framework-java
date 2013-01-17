@@ -32,38 +32,39 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 
+
 /**
  * @author liyan
  * 
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
-	private Logger logger;
-	private SocketServerFactory server;
+	private Logger log;
+	private ServiceContext context;
 
-	public HttpRequestHandler(SocketServerFactory server) {
-		this.logger = server.getLogger();
-		this.server = server;
+	public HttpRequestHandler(int port, ServiceContext context) {
+		this.log = Logger.getLogger("Server[" + port + "]");
+		this.context = context;
 	}
 	
 	public long getAccessCount() {
-		return server.getAccessCount().get();
+		return context.getAccessCount().get();
 	}
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
 		//Update access Count
-		server.getAccessCount().addAndGet(1);
+		context.getAccessCount().addAndGet(1);
 		HttpRequest request = (HttpRequest) e.getMessage();
 		
 		handleHttpRequest(e, request);
 	}
 	
 	public void handleHttpRequest(MessageEvent event, HttpRequest request) {
-		logger.info("handleHttpRequest");
+		log.info("handleHttpRequest");
 		try {
 			writeResponse(event, parseRequestParameter(request).toString());
 		} catch (UnsupportedEncodingException e) {
-			logger.log(Level.WARNING, "Unexpected exception from downstream.",
+			log.log(Level.WARNING, "Unexpected exception from downstream.",
 					e.getCause());
 		}
 	}
@@ -71,7 +72,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
 		// Close the connection when an exception is raised.
-		logger.log(Level.WARNING, "Unexpected exception from downstream.",
+		log.log(Level.WARNING, "Unexpected exception from downstream.",
 				e.getCause());
 		e.getChannel().close();
 	}

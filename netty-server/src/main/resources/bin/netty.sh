@@ -47,6 +47,9 @@
 # $Id: netty.sh 600664 2007-12-03 20:24:19Z jim $
 # -----------------------------------------------------------------------------
 
+# Business Server Port
+export PORT_BUSINESS=8080
+
 #Server Class for NETTY
 _ServerClass=com.li3huo.netty.DemoServer
 
@@ -233,6 +236,13 @@ elif [ "$1" = "version" ] ; then
       -classpath "$CLASSPATH" \
       com.li3huo.netty.util.ServerInfo
 
+elif [ "$1" = "hardware" ] ; then
+
+    echo "===========Hardware Status==========="
+    echo "CPU core number:        `grep processor /proc/cpuinfo | wc -l` "
+    echo `grep MemTotal /proc/meminfo`
+    echo "Current TCP Connections:        `netstat -tn |wc -l`"
+
 else
 
   echo "Usage: netty.sh ( commands ... )"
@@ -241,7 +251,8 @@ else
   echo "  start             Start netty in a separate window"
   echo "  stop              Stop netty"
   echo "  stop -force       Stop netty (followed by kill -KILL)"
-  echo "  version           What version of tomcat are you running?"
+  echo "  version           What version of netty server are you running?"
+  echo "  hardware          Show hardware info"
   exit 1
 
 fi

@@ -3,17 +3,21 @@
  */
 package com.li3huo.netty;
 
-import static org.jboss.netty.channel.Channels.pipeline;
-
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
 import com.li3huo.netty.service.ConsoleHandler;
 import com.li3huo.netty.service.HttpRequestHandler;
-import com.li3huo.netty.service.SocketServerFactory;
+import com.li3huo.netty.service.ServiceContext;
 
 /**
  * @author liyan
@@ -25,11 +29,20 @@ public class DemoServer {
 
 	private static int businessPort, consolePort;
 
-	private static SocketServerFactory businessServer, consoleServer;
+	private static ServiceContext context = new ServiceContext();
 
 	public static void init() {
-		businessPort = 8080;
+		
+		String envPort = System.getenv("PORT_BUSINESS");
+		if (null != envPort) {
+			businessPort = Integer.parseInt(envPort);
+		}
+		if(businessPort<=0) {
+			businessPort = 8080;
+		}
 		consolePort = 8005;
+		
+		
 	}
 
 	public static void start() {
@@ -37,35 +50,88 @@ public class DemoServer {
 		startConsole();
 	}
 
+//	private static void startBusiness() {
+//		init();
+//		/**
+//		 * create ChannelPipeline for business server
+//		 */
+//		ChannelPipeline pipeline = pipeline();
+//		businessServer = new SocketServerFactory(businessPort, pipeline);
+//
+//		pipeline.addLast("decoder", new HttpRequestDecoder());
+//		pipeline.addLast("encoder", new HttpResponseEncoder());
+//
+//		// add customised handler
+//		pipeline.addLast("handler", new HttpRequestHandler(businessServer));
+//
+//		businessServer.bindAndStartServer();
+//
+//	}
+	
 	private static void startBusiness() {
 		init();
+		
 		/**
-		 * create ChannelPipeline for business server
+		 * create business server
 		 */
-		ChannelPipeline pipeline = pipeline();
-		businessServer = new SocketServerFactory(businessPort, pipeline);
+		NioServerSocketChannelFactory server = new NioServerSocketChannelFactory(
+				Executors.newCachedThreadPool(),
+				Executors.newCachedThreadPool());
+		
+		context.setBusinessServer(businessPort, server);
+		
+		ServerBootstrap bootstrap = new ServerBootstrap(server);
+		
 
-		pipeline.addLast("decoder", new HttpRequestDecoder());
-		pipeline.addLast("encoder", new HttpResponseEncoder());
+		// Set up the pipeline factory.
+		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+			public ChannelPipeline getPipeline() throws Exception {
+				ChannelPipeline pipeline = Channels.pipeline();
+				
+				pipeline.addLast("decoder", new HttpRequestDecoder());
+				pipeline.addLast("encoder", new HttpResponseEncoder());
 
-		// add customised handler
-		pipeline.addLast("handler", new HttpRequestHandler(businessServer));
+				// add customised handler
+				pipeline.addLast("handler", new HttpRequestHandler(businessPort, context));
+				return pipeline;
+			}
+		});
 
-		businessServer.bindAndStartServer();
-
+		// Bind and start to accept incoming connections.
+		bootstrap.bind(new InetSocketAddress(businessPort));
+		log.info("Business start at "+businessPort);
 	}
 
 	private static void startConsole() {
-		ChannelPipeline pipeline = pipeline();
-		consoleServer = new SocketServerFactory(consolePort, pipeline);
+		/**
+		 * create business server
+		 */
+		NioServerSocketChannelFactory server = new NioServerSocketChannelFactory(
+				Executors.newCachedThreadPool(),
+				Executors.newCachedThreadPool());
+		
+		context.setConsoleServer(consolePort, server);
+		
+		ServerBootstrap bootstrap = new ServerBootstrap(server);
+		
 
-		pipeline.addLast("decoder", new HttpRequestDecoder());
-		pipeline.addLast("encoder", new HttpResponseEncoder());
+		// Set up the pipeline factory.
+		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+			public ChannelPipeline getPipeline() throws Exception {
+				ChannelPipeline pipeline = Channels.pipeline();
+				
+				pipeline.addLast("decoder", new HttpRequestDecoder());
+				pipeline.addLast("encoder", new HttpResponseEncoder());
 
-		// add customised handler
-		pipeline.addLast("handler", new ConsoleHandler(businessServer, consoleServer));
+				// add customised handler
+				pipeline.addLast("handler", new ConsoleHandler(consolePort, context));
+				return pipeline;
+			}
+		});
 
-		consoleServer.bindAndStartServer();
+		// Bind and start to accept incoming connections.
+		bootstrap.bind(new InetSocketAddress(consolePort));
+		log.info("Console start at "+consolePort);
 	}
 
 	public static void stop() {

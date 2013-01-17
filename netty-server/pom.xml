@@ -58,31 +58,18 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty</artifactId>
-			<scope>compile</scope>
+			<version>3.6.2.Final</version>
 		</dependency>
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
+			<version>4.11</version>
 		</dependency>
 	</dependencies>
 	<organization>
 		<name>li3huo</name>
 		<url>http://li3huo.com</url>
 	</organization>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty</artifactId>
-				<version>3.6.2.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.11</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>

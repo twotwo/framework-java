@@ -39,10 +39,9 @@ Netty提供的功能包括：
 ### 代码结构
 * com.li3huo.netty.DemoServer
  - Daemon
-* com.li3huo.netty.service.SocketServerFactory
- - 封装了NioServerSocketChannelFactory的服务创建接口
- - 构建时传入服务端口和ChannelPipeline
- - 调用bindAndStartServer()启动服务
+* com.li3huo.netty.service.ServiceContext
+ - 服务上下文
+ - 目前封装了NioServerSocketChannelFactory对象和服务计数器
 * com.li3huo.netty.service.HttpRequestHandler
  - 基于HTTP请求的处理器，框架的处理器基类
 * com.li3huo.netty.service.ConsoleHandler
