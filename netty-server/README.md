@@ -17,7 +17,8 @@ Netty提供的功能包括：
  * 抛弃jdk自实现的buffer，减少复制所带来的消耗；
  * 庞大而清晰的channel体系，灵活支持NIO/OIO及TCP/UDP多维组合；
  * 基于事件的过程流转以及完整的网络事件响应与扩展；
-1.丰富的协议支持：
+
+2.丰富的协议支持：
  * HTTP/WebSocket
  * SSL/TLS
  * Google Protobuf
@@ -25,7 +26,8 @@ Netty提供的功能包括：
  * Large File Transfer
  * RTSP
  * Thrift[注1]
-5.丰富的example，帮助开发者快速上手和理解
+
+3.丰富的example，帮助开发者快速上手和理解
 
 <img src#"https://netty.io/download/Main/WebHome/architecture.png" >
 
@@ -55,7 +57,8 @@ Netty提供的功能包括：
 
 ## 其他参考
 
-[The Netty Project 3.x User Guide](http://static.netty.io/3.6/guide/)
+* [The Netty Project 3.x User Guide](http://static.netty.io/3.6/guide/)
+* [注1](https://github.com/facebook/nifty/): Nifty is an implementation of Thrift clients and servers on Netty, written by facebook
 
 ## 后续计划
 
