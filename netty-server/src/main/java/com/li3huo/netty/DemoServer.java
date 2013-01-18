@@ -41,8 +41,6 @@ public class DemoServer {
 			businessPort = 8080;
 		}
 		consolePort = 8005;
-		
-		
 	}
 
 	public static void start() {

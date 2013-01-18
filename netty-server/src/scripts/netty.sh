@@ -241,7 +241,7 @@ elif [ "$1" = "hardware" ] ; then
     echo "===========Hardware Status==========="
     echo "CPU core number:        `grep processor /proc/cpuinfo | wc -l` "
     echo `grep MemTotal /proc/meminfo`
-    echo "Current TCP Connections:        `netstat -tn |wc -l`"
+    echo "TCP Connections(${PORT_BUSINESS}):        `netstat -an |grep tcp |grep $PORT_BUSINESS |wc -l`"
 
 else
 

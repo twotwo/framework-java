@@ -34,7 +34,7 @@ Netty提供的功能包括：
 [netty on github](https://github.com/netty/netty)
 
 
-## 应用开发框架介绍
+## 应用开发框架
 
 ### 代码结构
 * com.li3huo.netty.DemoServer
@@ -48,11 +48,20 @@ Netty提供的功能包括：
  - 后台管理处理器
  - 实现了服务状态查看/服务关闭功能
 
-### 应用maven-assembly-plugin加强了package功能，实现了保持脚本执行属性和tar.gz打包
-
-### 服务启动和关闭
+### 服务的运行和访问
 * 执行mvn package获得发布的应用
 * 放到*nix环境下，调用bin/netty.sh
+* 访问：http://ip:8080/ - 业务访问 | http://ip:8005/ - 管理后台
+
+### maven的应用
+* 每核心分配1个线程来执行：mvn -T 1C cmd
+* 应用maven-assembly-plugin加强了package功能，实现了保持脚本执行属性和tar.gz打包
+
+### 项目功能
+
+* 基于http的业务服务框架：包括业务服务和后台管理服务
+* 基于maven的持续集成支持
+* 基于脚本（sshpass needed）的部署
 
 ## 其他参考
 

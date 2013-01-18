@@ -23,7 +23,7 @@
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>src/main/resources/bin</directory>
+			<directory>src/scripts</directory>
 			<outputDirectory>bin</outputDirectory>
 			<fileMode>0733</fileMode>
 			<includes>
