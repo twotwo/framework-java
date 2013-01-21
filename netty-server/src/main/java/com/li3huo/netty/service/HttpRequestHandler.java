@@ -8,6 +8,7 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.SERVER;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -52,17 +53,19 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+		Long startTime = System.nanoTime();
 		//Update access Count
 		context.getAccessCount().addAndGet(1);
 		HttpRequest request = (HttpRequest) e.getMessage();
 		
 		handleHttpRequest(e, request);
+		context.getCostTime().addAndGet(System.nanoTime()-startTime);
 	}
 	
 	public void handleHttpRequest(MessageEvent event, HttpRequest request) {
 		log.info("handleHttpRequest");
 		try {
-			writeResponse(event, parseRequestParameter(request).toString());
+			writeResponse(event, makeTestContent(request).toString());
 		} catch (UnsupportedEncodingException e) {
 			log.log(Level.WARNING, "Unexpected exception from downstream.",
 					e.getCause());
@@ -122,7 +125,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		response.setContent(ChannelBuffers.copiedBuffer(content,
 				CharsetUtil.UTF_8));
-		response.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
+		response.setHeader(SERVER, "Netty-HTTP/1.0");
+		response.setHeader(CONTENT_TYPE, "text/html; charset=UTF-8");
 		
 		HttpRequest request = (HttpRequest) event.getMessage();
 		boolean keepAlive = isKeepAlive(request);
@@ -145,4 +149,29 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 		
 	}
+
+	public StringBuilder makeTestContent(HttpRequest request) throws UnsupportedEncodingException {
+		StringBuilder buf = new StringBuilder();
+		buf.append("<html>");
+		buf.append("\n<body bgcolor=\"white\">");
+		buf.append("<h1> Request Information </h1>");
+		buf.append("<font size=\"4\">");
+		buf.append("\nAccess Count: ").append(context.getAccessCount());
+		buf.append("<br>\nJSP Request Method: ").append(request.getMethod());
+		buf.append("<br>\nRequest URI: ").append(request.getUri() );
+		buf.append("<br>\nRequest Protocol: ").append(request.getProtocolVersion());
+		buf.append("<br>\nContent length: ").append(request.getHeader(CONTENT_LENGTH));
+		buf.append("<br>\nContent type: ").append(request.getHeader(CONTENT_TYPE));
+		buf.append("<br>\nServer name: ").append(request.getHeader(SERVER));
+		
+		buf.append("<br>\nRemote host: ").append(getHost(request, "unknown"));
+		
+		buf.append("<br>\nAverage Execute Cost Time: ").append(context.getCostTime().get() / context.getAccessCount().get() / 1000000).append(" ms.");
+		buf.append("<br>\nTotal Cost Time: ").append(context.getCostTime().get() / 1000000).append(" ms.");
+		buf.append("<!--                                                                                                                                    -->");
+		buf.append("<br>\n<h4>\n</font>\n</body>\n</html>");
+
+		return buf;
+	}
+
 }

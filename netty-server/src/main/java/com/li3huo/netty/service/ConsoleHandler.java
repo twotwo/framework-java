@@ -79,11 +79,18 @@ public class ConsoleHandler extends HttpRequestHandler {
 
 	private String getStatusInfo() {
 		StringBuffer buffer = new StringBuffer();
+		
+		buffer.append("<html>");
+		buffer.append("\n<body bgcolor=\"white\">");
+		buffer.append("<h1> Netty Server Console </h1>");
 
 		buffer.append("<pre>");
 
 		buffer.append("\nServer Access Count: " + getAccessCount());
 		buffer.append("\nConsole Access Count: " + accessCount);
+		
+		buffer.append("<br>\nEverage Execute Cost Time: ").append(context.getCostTime().get() / context.getAccessCount().get()).append(" ms.");
+		buffer.append("<br>\nTotal Cost Time: ").append(context.getCostTime().get() / 1000).append(" ms.");
 
 		buffer.append("\n\n====Uptime");
 		try {
@@ -110,6 +117,7 @@ public class ConsoleHandler extends HttpRequestHandler {
 		}
 
 		buffer.append("</pre>");
+		buffer.append("<br>\n<h4>\n</font>\n</body>\n</html>");
 
 		return buffer.toString();
 	}

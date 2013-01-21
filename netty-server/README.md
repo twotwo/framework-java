@@ -71,3 +71,6 @@ Netty提供的功能包括：
 ## 后续计划
 
 * 继续加强ConsoleServer的功能：结合JMX/提供业务调用计数接口
+* Known Issue:
+ 1. ab on mac don't work for this server. but also don't work for tomcat,   
+so it must be issue of ab on mac.

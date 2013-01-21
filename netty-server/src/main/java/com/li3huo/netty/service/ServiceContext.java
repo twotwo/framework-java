@@ -15,7 +15,8 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 public class ServiceContext {
 	
 	private Logger logger = Logger.getLogger(ServiceContext.class.getName());
-	private final AtomicLong accessCount = new AtomicLong();
+	private static AtomicLong accessCount = new AtomicLong();
+	private static AtomicLong costTime = new AtomicLong();
 
 	int businessPort, consolePort;
 	NioServerSocketChannelFactory businessServer, consoleServer;
@@ -34,6 +35,10 @@ public class ServiceContext {
 	
 	public AtomicLong getAccessCount() {
 		return accessCount;
+	}
+	
+	public AtomicLong getCostTime() {
+		return costTime;
 	}
 	
 	public Logger getLogger() {
