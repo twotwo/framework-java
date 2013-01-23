@@ -21,9 +21,12 @@ import com.li3huo.netty.util.ServerInfo;
  */
 public class ConsoleHandler extends HttpRequestHandler {
 
-	private final AtomicLong accessCount = new AtomicLong();
+	/**
+	 * record for console access count
+	 */
+	private AtomicLong consoleAccessCount = new AtomicLong();
 
-	private StringBuilder help = new StringBuilder();
+	private StringBuilder consoleHelpInfo = new StringBuilder();
 
 	private Logger log;
 	private ServiceContext context;
@@ -34,30 +37,39 @@ public class ConsoleHandler extends HttpRequestHandler {
 		this.context = context;
 
 		// create help hint
-		help.append("Usage:\n");
-		help.append("Actions\n");
-		help.append("action=status\n");
+		consoleHelpInfo.append("<html>");
+		consoleHelpInfo.append("\n<body bgcolor=\"white\">");
+		consoleHelpInfo.append("<h1> Netty Server Console </h1>");
+		consoleHelpInfo.append("<br>Usage:\n");
+		consoleHelpInfo.append("<br>Actions\n");
+		consoleHelpInfo
+				.append("<br><a href=\"console?action=status\">status</a>\n");
+		consoleHelpInfo.append("<br>\n<h4>\n</font>\n</body>\n</html>");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.li3huo.netty.service.HttpRequestHandler#handleHttpRequest(org.jboss
+	 * @see HttpRequestHandler#handleHttpRequest(org.jboss
 	 * .netty.channel.MessageEvent,
 	 * org.jboss.netty.handler.codec.http.HttpRequest)
 	 */
 	@Override
-	public void handleHttpRequest(MessageEvent event, HttpRequest request) {
+	public void handleHttpRequest(MessageEvent event, HttpRequest request)
+			throws Exception {
 
-		accessCount.addAndGet(1);
+		if (!request.getUri().startsWith("/console")) {
+			this.writeResponse(event, consoleHelpInfo.toString());
+			return;
+		}
+		consoleAccessCount.addAndGet(1);
 		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
 				request.getUri());
 		Map<String, List<String>> params = queryStringDecoder.getParameters();
 
 		List<String> actions = params.get("action");
 		if (null == actions) {
-			this.writeResponse(event, help.toString());
+			this.writeResponse(event, consoleHelpInfo.toString());
 			return;
 		}
 
@@ -67,11 +79,12 @@ public class ConsoleHandler extends HttpRequestHandler {
 				this.writeResponse(event, getStatusInfo());
 				continue;
 			} else if ("stop".equalsIgnoreCase(action)) {
-				this.writeResponse(event, "Access Count: " + getAccessCount());
+				this.writeResponse(event,
+						"Access Count: " + context.getAccessLog());
 				log.info("stoped by console, from " + event.getRemoteAddress());
 				System.exit(0);
 			} else {
-				this.writeResponse(event, help.toString());
+				this.writeResponse(event, consoleHelpInfo.toString());
 				return;
 			}
 		}
@@ -79,19 +92,24 @@ public class ConsoleHandler extends HttpRequestHandler {
 
 	private String getStatusInfo() {
 		StringBuffer buffer = new StringBuffer();
-		
+
 		buffer.append("<html>");
 		buffer.append("\n<body bgcolor=\"white\">");
 		buffer.append("<h1> Netty Server Console </h1>");
 
+		buffer.append("\n<h3>Server Access Count: " + context.getAccessCount());
+		buffer.append("</h3><h4>Finished Access Group by Uri: </h4>")
+				.append(context.getAccessLog()).append("<br>");
+
+		buffer.append("\n<br>Console Access Count: " + consoleAccessCount);
+
+		buffer.append("<br>\nEverage Execute Cost Time: ")
+				.append(context.getCostTime().get() / context.getAccessCount())
+				.append(" ms.");
+		buffer.append("<br>\nTotal Cost Time: ")
+				.append(context.getCostTime().get() / 1000).append(" ms.");
+
 		buffer.append("<pre>");
-
-		buffer.append("\nServer Access Count: " + getAccessCount());
-		buffer.append("\nConsole Access Count: " + accessCount);
-		
-		buffer.append("<br>\nEverage Execute Cost Time: ").append(context.getCostTime().get() / context.getAccessCount().get()).append(" ms.");
-		buffer.append("<br>\nTotal Cost Time: ").append(context.getCostTime().get() / 1000).append(" ms.");
-
 		buffer.append("\n\n====Uptime");
 		try {
 			ServerInfo.loadUptime(buffer);

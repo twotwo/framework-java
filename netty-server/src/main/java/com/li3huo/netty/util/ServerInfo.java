@@ -128,7 +128,6 @@ public class ServerInfo {
 	 * @param args
 	 */
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
 		System.out.println("Server version: " + getServerInfo());
 		System.out.println("Server built:   " + getServerBuilt());
 		System.out.println("Server number:  " + getServerNumber());
