@@ -80,6 +80,8 @@ public class DemoServer {
 		
 		ServerBootstrap bootstrap = new ServerBootstrap(server);
 		
+		// Reuse address, powered by liumingfei.com
+		bootstrap.setOption("reuseAddress", true);
 
 		// Set up the pipeline factory.
 		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {

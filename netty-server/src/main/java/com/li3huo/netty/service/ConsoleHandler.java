@@ -79,10 +79,10 @@ public class ConsoleHandler extends HttpRequestHandler {
 				this.writeResponse(event, getStatusInfo());
 				continue;
 			} else if ("stop".equalsIgnoreCase(action)) {
-				this.writeResponse(event,
-						"Access Count: " + context.getAccessLog());
+				this.writeResponse(event, context.getSnapshotService()
+						.getAccessLog());
 				log.info("stoped by console, from " + event.getRemoteAddress());
-				System.exit(0);
+				// System.exit(0);
 			} else {
 				this.writeResponse(event, consoleHelpInfo.toString());
 				return;
@@ -97,17 +97,10 @@ public class ConsoleHandler extends HttpRequestHandler {
 		buffer.append("\n<body bgcolor=\"white\">");
 		buffer.append("<h1> Netty Server Console </h1>");
 
-		buffer.append("\n<h3>Server Access Count: " + context.getAccessCount());
-		buffer.append("</h3><h4>Finished Access Group by Uri: </h4>")
-				.append(context.getAccessLog()).append("<br>");
+		buffer.append("<h2>Access Log</h2>")
+				.append(context.getSnapshotService().getAccessLog()).append("<br>");
 
-		buffer.append("\n<br>Console Access Count: " + consoleAccessCount);
-
-		buffer.append("<br>\nEverage Execute Cost Time: ")
-				.append(context.getCostTime().get() / context.getAccessCount())
-				.append(" ms.");
-		buffer.append("<br>\nTotal Cost Time: ")
-				.append(context.getCostTime().get() / 1000).append(" ms.");
+		buffer.append("\n<br>Valid Console Access Count: " + consoleAccessCount);
 
 		buffer.append("<pre>");
 		buffer.append("\n\n====Uptime");

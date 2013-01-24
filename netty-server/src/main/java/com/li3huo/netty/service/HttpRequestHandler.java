@@ -53,6 +53,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
+		Long startTime = System.nanoTime();
 		HttpRequest request = (HttpRequest) event.getMessage();
 
 		try {
@@ -63,7 +64,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 							+ e.getMessage());
 		} finally {
 			// log access info
-			context.logAccess(request);
+			context.getSnapshotService().logAccess(request, System.nanoTime()-startTime);
 		}
 	}
 
@@ -188,7 +189,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		buf.append("\n<body bgcolor=\"white\">");
 		buf.append("<h1> Request Information </h1>");
 		buf.append("<font size=\"4\">");
-		buf.append("\nAccess Count: ").append(context.getAccessCount());
 		buf.append("<br>\nJSP Request Method: ").append(request.getMethod());
 		buf.append("<br>\nRequest URI: ").append(request.getUri());
 		buf.append("<br>\nRequest Protocol: ").append(
@@ -201,12 +201,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		buf.append("<br>\nRemote host: ").append(getHost(request, "unknown"));
 
-		buf.append("<br>\nAverage Execute Cost Time: ")
-				.append(context.getCostTime().get() / context.getAccessCount()
-						/ 1000000).append(" ms.");
-		buf.append("<br>\nTotal Cost Time: ")
-				.append(context.getCostTime().get() / 1000000).append(" ms.");
-		buf.append("<!--                                                                                                                                    -->");
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+		
 		buf.append("<br>\n<h4>\n</font>\n</body>\n</html>");
 
 		return buf;
