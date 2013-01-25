@@ -46,7 +46,7 @@
 #
 # $Id: netty.sh 600664 2007-12-03 20:24:19Z jim $
 # -----------------------------------------------------------------------------
-
+LC_ALL=en_US.UTF-8
 # Business Server Port
 export PORT_BUSINESS=8080
 
@@ -182,7 +182,7 @@ if [ "$1" = "run" ]; then
 
 elif [ "$1" = "start" ] ; then
 
-  if [ -e $NETTY_PID -a ! -z $NETTY_PID ];then  
+  if [ -e $NETTY_PID -a ! -z $NETTY_PID ];then
     echo "server already running...."  
     exit 1  
   fi

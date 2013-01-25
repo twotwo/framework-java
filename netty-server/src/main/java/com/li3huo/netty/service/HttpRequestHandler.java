@@ -14,13 +14,13 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SER
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import org.apache.log4j.Logger;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.ClosedChannelException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelFuture;
@@ -55,26 +55,25 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
 		Long startTime = System.nanoTime();
 		HttpRequest request = (HttpRequest) event.getMessage();
-
+		log.debug("Receive a HttpRequest...");
 		try {
 			handleHttpRequest(event, request);
 		} catch (Exception e) {
-			log.log(Level.SEVERE,
-					"Unexpected exception from handleHttpRequest."
-							+ e.getMessage());
+			log.fatal("Unexpected exception from handleHttpRequest."
+					+ e.getMessage());
 		} finally {
 			// log access info
-			context.getSnapshotService().logAccess(request, System.nanoTime()-startTime);
+			context.getSnapshotService().logAccess(request,
+					System.nanoTime() - startTime);
 		}
 	}
 
 	public void handleHttpRequest(MessageEvent event, HttpRequest request)
 			throws Exception {
-		log.info("handleHttpRequest");
 		try {
 			writeResponse(event, makeTestContent(request).toString());
 		} catch (UnsupportedEncodingException e) {
-			log.log(Level.WARNING, "Unexpected exception from downstream.",
+			log.warn("Unexpected exception from downstream.",
 					e.getCause());
 		}
 	}
@@ -100,7 +99,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		response.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
 		response.setContent(ChannelBuffers.copiedBuffer(
 				"Failure: " + status.toString() + "\r\n", CharsetUtil.UTF_8));
-		log.log(Level.WARNING, "Error code: " + status.toString());
+		log.warn("Error code: " + status.toString());
 		// Close the connection as soon as the error message is sent.
 		ctx.getChannel().write(response)
 				.addListener(ChannelFutureListener.CLOSE);
@@ -206,7 +205,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		buf.append("<!--          30           -->");
 		buf.append("<!--          30           -->");
 		buf.append("<!--          30           -->");
-		
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+		buf.append("<!--          30           -->");
+
 		buf.append("<br>\n<h4>\n</font>\n</body>\n</html>");
 
 		return buf;

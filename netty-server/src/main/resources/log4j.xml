@@ -7,7 +7,7 @@
 	<appender name="console" class="org.apache.log4j.ConsoleAppender">
 		<param name="Target" value="System.out" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%-5p: %c - %m%n" />
+			<param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %-5p: %c - %m%n" />
 		</layout>
 	</appender>
 
@@ -18,7 +18,8 @@
 	
 	<!-- framework Loggers -->
 	<logger name="com.li3huo.netty">
-		<level value="debug" />
+		<!-- FATAL/ERROR/WARN/INFO/TRACE(DEBUG) -->
+		<level value="WARN" />
 	</logger>
 
 	<!-- Root Logger -->

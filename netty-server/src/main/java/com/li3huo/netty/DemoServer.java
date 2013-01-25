@@ -5,8 +5,8 @@ package com.li3huo.netty;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -161,8 +161,8 @@ public class DemoServer {
 					start();
 				} catch (Exception e) {
 					e.printStackTrace();
-					log.warning("error: " + e.getMessage());
-					log.warning("exit program. pls check and restart again.");
+					log.fatal(e.getMessage());
+					log.fatal("exit program. pls check and restart again.");
 					System.exit(0);
 				}
 			} else if (command.equals("stop")) {
@@ -172,7 +172,7 @@ public class DemoServer {
 				log.info("Stopping...");
 				status();
 			} else {
-				log.warning("Bootstrap: command \"" + command
+				log.fatal("Bootstrap: command \"" + command
 						+ "\" does not exist.");
 			}
 		} catch (Throwable t) {
