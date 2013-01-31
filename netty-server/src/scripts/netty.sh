@@ -51,7 +51,7 @@ LC_ALL=en_US.UTF-8
 export PORT_BUSINESS=8080
 
 #Server Class for NETTY
-_ServerClass=com.li3huo.netty.DemoServer
+_ServerClass=com.li3huo.netty.startup.Bootstrap
 
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false

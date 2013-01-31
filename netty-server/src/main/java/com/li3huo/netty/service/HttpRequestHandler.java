@@ -14,14 +14,12 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SER
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-import org.apache.log4j.Logger;
-
 import java.io.UnsupportedEncodingException;
-import java.nio.channels.ClosedChannelException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -55,12 +53,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
 		Long startTime = System.nanoTime();
 		HttpRequest request = (HttpRequest) event.getMessage();
-		log.debug("Receive a HttpRequest...");
+		log.debug("Receive HttpRequest["+request.getUri()+"]");
 		try {
 			handleHttpRequest(event, request);
 		} catch (Exception e) {
-			log.fatal("Unexpected exception from handleHttpRequest."
-					+ e.getMessage());
+			log.fatal("Handle HttpRequest["+request.getUri()+"] Failed:"+e.getMessage());
 		} finally {
 			// log access info
 			context.getSnapshotService().logAccess(request,
@@ -70,12 +67,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	public void handleHttpRequest(MessageEvent event, HttpRequest request)
 			throws Exception {
-		try {
-			writeResponse(event, makeTestContent(request).toString());
-		} catch (UnsupportedEncodingException e) {
-			log.warn("Unexpected exception from downstream.",
-					e.getCause());
-		}
+		writeResponse(event, makeTestContent(request).toString());
 	}
 
 	@Override
@@ -168,15 +160,21 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			response.setHeader(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
 		}
 
-		if (!event.getChannel().isWritable()) {
-			throw new ClosedChannelException();
-		}
-
 		// Write the response.
-		ChannelFuture future = event.getChannel().write(response);
+		log.debug("Channel Status [w="+event.getChannel().isWritable()+", o="+event.getChannel().isOpen()+"]");
+		ChannelFuture future = null;
+		try {
+			future = event.getChannel().write(response);
+		} catch (Exception ex) {
+			Exception e = new Exception("Channel Writing failed at"
+					+ request.getUri() + "[reason]" + ex.getMessage());
+			e.initCause(ex);
+			throw e;
+		} finally {
 
-		if (!keepAlive) {
-			future.addListener(ChannelFutureListener.CLOSE);
+			if (!keepAlive && null != future) {
+				future.addListener(ChannelFutureListener.CLOSE);
+			}
 		}
 
 	}

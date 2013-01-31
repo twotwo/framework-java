@@ -19,7 +19,7 @@
 	<!-- framework Loggers -->
 	<logger name="com.li3huo.netty">
 		<!-- FATAL/ERROR/WARN/INFO/TRACE(DEBUG) -->
-		<level value="WARN" />
+		<level value="INFO" />
 	</logger>
 
 	<!-- Root Logger -->
