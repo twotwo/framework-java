@@ -142,7 +142,7 @@ public class HttpServer implements Server {
 	 * @see com.li3huo.netty.Server#status()
 	 */
 	public void status() {
-
+		System.out.println("Show Status");
 	}
 
 	/**
