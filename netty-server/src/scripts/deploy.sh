@@ -1,16 +1,21 @@
 #!/bin/sh
 
-package=target/netty-server-0.1.0-release.tar.gz
-dest=172.27.234.152
-pre_call="sshpass -f ~/.passwd"
+# powered by li3huo.com
 
-#export SSHPASS=mypassword
+# package for delopy
+package=target/netty-server-0.1.0-release.tar.gz
+# user@host
+dest_host=ci@172.27.233.221
+# cmd prefix: should install sshpass first
+# sshpass -p password ssh ci@172.27.233.221
+cmd_prefix="sshpass -p password "
+
 echo "remove old package..."
-sshpass -f ~/.passwd ssh $dest "netty-server-0.1.0/bin/netty.sh stop \
+${cmd_prefix} ssh $dest_host "netty-server-0.1.0/bin/netty.sh stop \
 rm -rf netty-server-0.1.0* \ 
 ls"
 echo "copy new package..."
-sshpass -f ~/.passwd scp $package ${dest}:. 
+${cmd_prefix} scp $package ${dest_host}:. 
 echo "starting service..."
-sshpass -f ~/.passwd ssh $dest "tar xzf netty-server-0.1.0-release.tar.gz"
-sshpass -f ~/.passwd ssh $dest "netty-server-0.1.0/bin/netty.sh start"
+${cmd_prefix} ssh $dest_host "tar xzf netty-server-0.1.0-release.tar.gz"
+${cmd_prefix} ssh $dest_host "netty-server-0.1.0/bin/netty.sh start"

@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
  *         Server bootstrap
  */
 public class Bootstrap {
-	
+
 	private static Logger log = Logger.getLogger(Bootstrap.class.getName());
 
 	/**
@@ -20,7 +20,7 @@ public class Bootstrap {
 	private static Server daemon = null;
 
 	private static Server getInstance() {
-		return null;
+		return new HttpServer();
 	}
 
 	/**

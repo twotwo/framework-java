@@ -23,12 +23,13 @@ import com.li3huo.netty.util.HttpTool;
 public class HttpServerTest {
 	
 	private static Logger log = Logger.getLogger(HttpServerTest.class.getName());
-	static Server server = new HttpServer();
+	static Server server;
 	
 	static final String urlConsole = "http://localhost:8005/console";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		server = new HttpServer();
 		server.start();
 	}
 
