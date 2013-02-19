@@ -1,4 +1,4 @@
-package com.li3huo.netty.util;
+package com.li3huo.util;
 /**
  * 
  */

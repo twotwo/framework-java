@@ -36,6 +36,8 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 
+import com.li3huo.netty.service.snapshot.AccessLog;
+
 /**
  * @author liyan
  * 
@@ -51,17 +53,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
-		Long startTime = System.nanoTime();
 		HttpRequest request = (HttpRequest) event.getMessage();
 		log.debug("Receive HttpRequest["+request.getUri()+"]");
+		AccessLog httpLog = new AccessLog(event);
 		try {
 			handleHttpRequest(event, request);
 		} catch (Exception e) {
 			log.fatal("Handle HttpRequest["+request.getUri()+"] Failed:"+e.getMessage());
 		} finally {
 			// log access info
-			context.getSnapshotService().logAccess(request,
-					System.nanoTime() - startTime);
+			context.getSnapshotService().logAccess(httpLog);
 		}
 	}
 

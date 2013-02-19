@@ -1,7 +1,7 @@
 /**
  * Create at Jan 31, 2013
  */
-package com.li3huo.netty.util;
+package com.li3huo.util;
 
 import java.io.BufferedReader;
 import java.io.File;

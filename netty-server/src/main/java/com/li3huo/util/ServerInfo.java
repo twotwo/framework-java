@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.li3huo.netty.util;
+package com.li3huo.util;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -13,7 +13,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
-import com.li3huo.netty.util.ServerInfo;
+import com.li3huo.util.ServerInfo;
 
 /**
  * @author liyan

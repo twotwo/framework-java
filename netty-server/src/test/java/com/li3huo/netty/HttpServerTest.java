@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.li3huo.netty.startup.HttpServer;
 import com.li3huo.netty.startup.Server;
-import com.li3huo.netty.util.HttpTool;
+import com.li3huo.util.HttpTool;
 
 /**
  * @author liyan

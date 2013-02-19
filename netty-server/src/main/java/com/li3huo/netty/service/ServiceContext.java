@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
+import com.li3huo.netty.service.snapshot.SnapshotService;
+
 /**
  * @author liyan
  * 

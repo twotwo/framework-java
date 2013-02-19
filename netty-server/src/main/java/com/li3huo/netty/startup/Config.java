@@ -5,7 +5,7 @@ package com.li3huo.netty.startup;
 
 import org.apache.log4j.Logger;
 
-import com.li3huo.netty.util.JSONTool;
+import com.li3huo.util.JSONTool;
 
 /**
  * @author liyan
