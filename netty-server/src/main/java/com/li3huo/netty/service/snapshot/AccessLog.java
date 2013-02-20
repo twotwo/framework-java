@@ -13,6 +13,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
  * @author liyan
  * 
  * Log for Every Http Request
+ * @deprecated use MessageWatch instead
  */
 public class AccessLog {
 	private long createTime;

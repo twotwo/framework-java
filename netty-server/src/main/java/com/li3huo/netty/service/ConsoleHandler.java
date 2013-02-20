@@ -4,6 +4,7 @@
 package com.li3huo.netty.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,6 +14,8 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
+import com.li3huo.netty.service.snapshot.MessageWatch;
+import com.li3huo.netty.service.snapshot.SnapshotService;
 import com.li3huo.util.ServerInfo;
 
 /**
@@ -29,12 +32,12 @@ public class ConsoleHandler extends HttpRequestHandler {
 	private StringBuilder consoleHelpInfo = new StringBuilder();
 
 	private Logger log;
-	private ServiceContext context;
+	// private ServiceContext context;
+	private SnapshotService snapshot = ApplicationConfig.getSnapshotService();
 
-	public ConsoleHandler(int port, ServiceContext context) {
-		super(port, context);
+	public ConsoleHandler(int port) {
+		super(port);
 		this.log = Logger.getLogger("Server[" + port + "]");
-		this.context = context;
 
 		// create help hint
 		consoleHelpInfo.append("<html>");
@@ -44,19 +47,23 @@ public class ConsoleHandler extends HttpRequestHandler {
 		consoleHelpInfo.append("<br>Actions\n");
 		consoleHelpInfo
 				.append("<br><a href=\"console?action=status\">status</a>\n");
+		consoleHelpInfo
+				.append("<br><a href=\"console?action=snapshot\">snapshot</a>\n");
 		consoleHelpInfo.append("<br>\n<h4>\n</font>\n</body>\n</html>");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see HttpRequestHandler#handleHttpRequest(org.jboss
-	 * .netty.channel.MessageEvent,
-	 * org.jboss.netty.handler.codec.http.HttpRequest)
+	 * @see
+	 * com.li3huo.netty.service.HttpRequestHandler#handleHttpRequest(com.li3huo
+	 * .netty.service.snapshot.MessageWatch)
 	 */
 	@Override
-	public void handleHttpRequest(MessageEvent event, HttpRequest request)
-			throws Exception {
+	public void handleHttpRequest(MessageWatch watch) throws Exception {
+
+		MessageEvent event = watch.getEvent();
+		HttpRequest request = watch.getRequest();
 
 		if (!request.getUri().startsWith("/console")) {
 			this.writeResponse(event, consoleHelpInfo.toString());
@@ -78,9 +85,11 @@ public class ConsoleHandler extends HttpRequestHandler {
 			if ("status".equalsIgnoreCase(action)) {
 				this.writeResponse(event, getStatusInfo());
 				continue;
+			} else if ("snapshot".equalsIgnoreCase(action)) {
+				this.writeResponse(event, getSnapshotInfo());
+				continue;
 			} else if ("stop".equalsIgnoreCase(action)) {
-				this.writeResponse(event, context.getSnapshotService()
-						.getAccessLog());
+				this.writeResponse(event, snapshot.getAccessLog());
 				log.info("stoped by console, from " + event.getRemoteAddress());
 				// System.exit(0);
 			} else {
@@ -95,10 +104,10 @@ public class ConsoleHandler extends HttpRequestHandler {
 
 		buffer.append("<html>");
 		buffer.append("\n<body bgcolor=\"white\">");
-		buffer.append("<h1> Netty Server Console </h1>");
+		buffer.append("<h1>Netty Server Console</h1>");
 
-		buffer.append("<h2>Access Log</h2>")
-				.append(context.getSnapshotService().getAccessLog()).append("<br>");
+		buffer.append("<h2>Access Log</h2>").append(snapshot.getAccessLog())
+				.append("<br>");
 
 		buffer.append("\n<br>Valid Console Access Count: " + consoleAccessCount);
 
@@ -133,4 +142,23 @@ public class ConsoleHandler extends HttpRequestHandler {
 		return buffer.toString();
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	private String getSnapshotInfo() {
+		StringBuffer buffer = new StringBuffer();
+
+		buffer.append("<html>");
+		buffer.append("\n<body bgcolor=\"white\">");
+		buffer.append("<h1>Netty Server Console</h1>\n");
+		buffer.append("<h2>Snapshot at " + new Date() + "</h2>\n");
+		buffer.append("<h3>Http Access Summary</h3>\n");
+		buffer.append(snapshot.getAccessLog());
+		buffer.append("<h3>Bisiness Process Summary</h3>\n");
+		buffer.append(snapshot.getAccessLog());
+		buffer.append("\n</body>\n</html>");
+
+		return buffer.toString();
+	}
 }

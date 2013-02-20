@@ -37,12 +37,20 @@ public class SnapshotService {
 		}
 		accessStatics.get(key).logAccess(costNanoTime);
 	}
-	public synchronized void logAccess(AccessLog httpLog) {
-		String key = httpLog.getAccessKey();
-		if (null == accessStatics.get(key)) {
-			accessStatics.put(key, new AccessStatics(key));
-		}
-		accessStatics.get(key).addLog(httpLog);
+	
+	private SumObjectMap accessAndCosttimebyUri = new SumObjectMap();
+	private SumObjectMap processStatus = new SumObjectMap();
+	private SumObjectMap accessByIP = new SumObjectMap();
+	
+	public void addMessageWatch(MessageWatch watch) {
+		String key = watch.getRequestUri();
+		accessAndCosttimebyUri.add(key, 1, watch.getAliveTime());
+		
+		key = ""+watch.getResponseStatus();
+		processStatus.add(key, 1, watch.getAliveTime(MessageWatch.State_Work));
+		
+		key = watch.getRemoteIP();
+		accessByIP.add(key, 1, watch.getAliveTime());
 	}
 
 	public String getAccessLog() {

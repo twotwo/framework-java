@@ -59,6 +59,9 @@ class AccessStatics {
 	}
 
 	public long getAverageCost() {
+		if(0==accessCount.get()) {
+			return 0;
+		}
 		return costTime.get() / accessCount.get() / 1000000;
 	}
 

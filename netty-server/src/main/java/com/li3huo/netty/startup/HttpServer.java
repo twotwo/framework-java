@@ -15,9 +15,9 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
+import com.li3huo.netty.service.ApplicationConfig;
 import com.li3huo.netty.service.ConsoleHandler;
 import com.li3huo.netty.service.HttpRequestHandler;
-import com.li3huo.netty.service.ServiceContext;
 
 /**
  * @author liyan
@@ -28,8 +28,6 @@ public class HttpServer implements Server {
 	private static Logger log = Logger.getLogger(HttpServer.class.getName());
 
 	private static int businessPort, consolePort;
-
-	private static ServiceContext context = new ServiceContext();
 
 	/*
 	 * (non-Javadoc)
@@ -46,6 +44,8 @@ public class HttpServer implements Server {
 			businessPort = 8080;
 		}
 		consolePort = 8005;
+
+		ApplicationConfig.init();
 	}
 
 	/*
@@ -59,7 +59,6 @@ public class HttpServer implements Server {
 	}
 
 	private void startBusiness() {
-		init();
 
 		/**
 		 * create business server
@@ -67,8 +66,6 @@ public class HttpServer implements Server {
 		NioServerSocketChannelFactory server = new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(),
 				Executors.newCachedThreadPool());
-
-		context.setBusinessServer(businessPort, server);
 
 		ServerBootstrap bootstrap = new ServerBootstrap(server);
 
@@ -84,8 +81,8 @@ public class HttpServer implements Server {
 				pipeline.addLast("encoder", new HttpResponseEncoder());
 
 				// add customised handler
-				pipeline.addLast("handler", new HttpRequestHandler(
-						businessPort, context));
+				pipeline.addLast("handler",
+						new HttpRequestHandler(businessPort));
 				return pipeline;
 			}
 		});
@@ -103,8 +100,6 @@ public class HttpServer implements Server {
 				Executors.newCachedThreadPool(),
 				Executors.newCachedThreadPool());
 
-		context.setConsoleServer(consolePort, server);
-
 		ServerBootstrap bootstrap = new ServerBootstrap(server);
 
 		// Set up the pipeline factory.
@@ -116,8 +111,7 @@ public class HttpServer implements Server {
 				pipeline.addLast("encoder", new HttpResponseEncoder());
 
 				// add customised handler
-				pipeline.addLast("handler", new ConsoleHandler(consolePort,
-						context));
+				pipeline.addLast("handler", new ConsoleHandler(consolePort));
 				return pipeline;
 			}
 		});
@@ -144,45 +138,4 @@ public class HttpServer implements Server {
 	public void status() {
 		System.out.println("Show Status");
 	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-
-		Server daemon = new HttpServer();
-
-		try {
-			String command = "start";
-			if (args.length > 0) {
-				command = args[args.length - 1];
-			}
-
-			if (command.equals("start")) {
-				log.info("Starting server...");
-				// init reflaction, log4j etc...
-				// ApplicationConfig.init();
-				try {
-					daemon.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-					log.fatal(e.getMessage());
-					log.fatal("exit program. pls check and restart again.");
-					System.exit(0);
-				}
-			} else if (command.equals("stop")) {
-				log.info("Stopping...");
-				daemon.stop();
-			} else if (command.equals("status")) {
-				log.info("Status...");
-				daemon.status();
-			} else {
-				log.warn("Bootstrap: command \"" + command
-						+ "\" does not exist.");
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
-	}
-
 }

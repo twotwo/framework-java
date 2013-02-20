@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.buffer.CompositeChannelBuffer;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -36,7 +37,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 
-import com.li3huo.netty.service.snapshot.AccessLog;
+import com.li3huo.netty.service.snapshot.MessageWatch;
 
 /**
  * @author liyan
@@ -44,26 +45,43 @@ import com.li3huo.netty.service.snapshot.AccessLog;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	private Logger log;
-	private ServiceContext context;
 
-	public HttpRequestHandler(int port, ServiceContext context) {
+	public HttpRequestHandler(int port) {
 		this.log = Logger.getLogger("Server[" + port + "]");
-		this.context = context;
 	}
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
+		MessageWatch watch = new MessageWatch(event);
 		HttpRequest request = (HttpRequest) event.getMessage();
-		log.debug("Receive HttpRequest["+request.getUri()+"]");
-		AccessLog httpLog = new AccessLog(event);
+		log.debug("Receive HttpRequest[" + request.getUri() + "]");
 		try {
-			handleHttpRequest(event, request);
+			handleHttpRequest(watch);
+			// handleHttpRequest(watch);
 		} catch (Exception e) {
-			log.fatal("Handle HttpRequest["+request.getUri()+"] Failed:"+e.getMessage());
+			log.fatal("Handle HttpRequest[" + request.getUri() + "] Failed:"
+					+ e.getMessage());
 		} finally {
-			// log access info
-			context.getSnapshotService().logAccess(httpLog);
+			// add messageWatch to Snapshot.
+			ApplicationConfig.getSnapshotService().addMessageWatch(watch);
 		}
+	}
+
+	public byte[] loadRequestData(HttpRequest request) {
+		byte[] bytes = null;
+		if (request.getContent() instanceof CompositeChannelBuffer) {
+			int i = ((CompositeChannelBuffer) request.getContent()).capacity();
+			bytes = new byte[i];
+			request.getContent().getBytes(0, bytes, 0, i);
+		} else {
+			bytes = request.getContent().array();
+		}
+		return bytes;
+	}
+
+	public void handleHttpRequest(MessageWatch watch) throws Exception {
+		writeResponse(watch.getEvent(), makeTestContent(watch.getRequest())
+				.toString());
 	}
 
 	public void handleHttpRequest(MessageEvent event, HttpRequest request)
@@ -162,7 +180,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 
 		// Write the response.
-		log.debug("Channel Status [w="+event.getChannel().isWritable()+", o="+event.getChannel().isOpen()+"]");
+		log.debug("Channel Status [w=" + event.getChannel().isWritable()
+				+ ", o=" + event.getChannel().isOpen() + "]");
 		ChannelFuture future = null;
 		try {
 			future = event.getChannel().write(response);
