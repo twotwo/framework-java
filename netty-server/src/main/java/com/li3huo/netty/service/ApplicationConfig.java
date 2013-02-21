@@ -1,8 +1,9 @@
 package com.li3huo.netty.service;
 
 import org.apache.log4j.Logger;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 
-import com.li3huo.netty.service.snapshot.MessageWatch;
+import com.li3huo.business.RandomErrorProcessor;
 import com.li3huo.netty.service.snapshot.SnapshotService;
 
 /**
@@ -40,34 +41,15 @@ public class ApplicationConfig {
 	 * the overall business process logic
 	 * 
 	 * @param watch
+	 * @throws Exception 
 	 */
-	public static byte[] process(MessageWatch watch, byte[] req) {
-		watch.start(MessageWatch.State_Work);
-		byte[] resp = null;
-		try {
+	public static HttpResponse process(HttpMessageContext msgCtx) throws Exception {
+		/*
+		 * get processor by request uri
+		 */
+		RandomErrorProcessor processor = new RandomErrorProcessor(msgCtx.requestUri);
 
-			/*
-			 * get processor by request uri
-			 */
-			watch.getRequestUri();
-			// new processor
-			/*
-			 * give Netty IO to processor
-			 */
-			// processor.process(watch, req)
-			String content = "request size = ";
-			if (null != req) {
-				content += req.length;
-			} else {
-				content += "null";
-			}
-			resp = content.getBytes();
-
-		} catch (Exception e) {
-			watch.addException(e);
-		}
-		watch.stop(MessageWatch.State_Work);
-		return resp;
+		return processor.process(msgCtx);
 	}
 
 	/**

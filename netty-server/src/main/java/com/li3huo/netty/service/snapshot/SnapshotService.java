@@ -15,75 +15,67 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
  * 
  */
 public class SnapshotService {
-	private static Map<String, AccessStatics> accessStatics = new HashMap<String, AccessStatics>();
-	DecimalFormat format = new DecimalFormat("#,##0.### ms");
 
 	public String getAccessKey(HttpRequest request) {
 		return HttpHeaders.getHost(request, "") + request.getUri();
 	}
 
-	/**
-	 * log for access uri and cost time
-	 * 
-	 * @param request
-	 * @param costNanoTime
-	 * 
-	 * @deprecated
-	 */
-	public synchronized void logAccess(HttpRequest request, long costNanoTime) {
-		String key = getAccessKey(request);
-		if (null == accessStatics.get(key)) {
-			accessStatics.put(key, new AccessStatics(key));
-		}
-		accessStatics.get(key).logAccess(costNanoTime);
+
+	public static final int WATCH_KEY_ACCESS_BY_URI = 1;
+	public static final int WATCH_KEY_ACCESS_BY_IP = 2;
+	public static final int WATCH_KEY_PROCESS_BY_STATUS = 3;
+
+	private Map<String, SumObjectMap> watchMap = new HashMap<String, SumObjectMap>();
+
+	public SnapshotService() {
+		// init watch map
+		SumObjectMap map = new SumObjectMap("Access Count Group By Uri");
+		watchMap.put("1", map);
+
+		map = new SumObjectMap("Access Count Group By IP");
+		watchMap.put("2", map);
+
+		map = new SumObjectMap("Process Count Group By Status");
+		watchMap.put("3", map);
 	}
-	
-	private SumObjectMap accessAndCosttimebyUri = new SumObjectMap();
-	private SumObjectMap processStatus = new SumObjectMap();
-	private SumObjectMap accessByIP = new SumObjectMap();
-	
+
 	public void addMessageWatch(MessageWatch watch) {
 		String key = watch.getRequestUri();
-		accessAndCosttimebyUri.add(key, 1, watch.getAliveTime());
-		
-		key = ""+watch.getResponseStatus();
-		processStatus.add(key, 1, watch.getAliveTime(MessageWatch.State_Work));
-		
+		watchMap.get(String.valueOf(WATCH_KEY_ACCESS_BY_URI)).add(key, 1,
+				watch.getAliveTime());
+
+		key = String.valueOf(watch.getResponseCode());
+		// only add business log
+		if (watch.isBusiness()) {
+			watchMap.get(String.valueOf(WATCH_KEY_PROCESS_BY_STATUS)).add(key,
+					1, watch.getAliveTime(MessageWatch.STATE_BUSINESS));
+		}
+
 		key = watch.getRemoteIP();
-		accessByIP.add(key, 1, watch.getAliveTime());
+		watchMap.get(String.valueOf(WATCH_KEY_ACCESS_BY_IP)).add(key, 1,
+				watch.getAliveTime());
 	}
 
-	public String getAccessLog() {
-		StringBuffer buf = new StringBuffer();
+	public String getWatchInfo(int key, int format) {
 
-		long totalCount = 0, totolCost = 0;
+		// return all known report
+		if (key == 0) {
+			StringBuffer sb = new StringBuffer(1000);
+			for (int i = 1; i < 4; i++) {
+				sb.append(watchMap.get(String.valueOf(i)).toString(format));
+				sb.append("\n<br>");
+			}
 
-		buf.append("<h3>Access Details</h3>")
-				.append("<table border=\"1\">")
-				.append("<tr><td><b>URI</b>\t</td><td><b>Count</b></td><td><b>Average Cost(ms)</b></td></tr>\n");
-		for (Map.Entry<String, AccessStatics> log : accessStatics.entrySet()) {
-			buf.append("<tr><td>").append(log.getKey()).append("</td><td>")
-					.append(log.getValue().getAccessCount()).append("</td><td>")
-					.append(formatLong(log.getValue().getAverageCost()))
-					.append("</td></tr>\n");
-			totalCount += log.getValue().getAccessCount().get();
-			totolCost += log.getValue().getCostTime().get();
-		}
-		buf.append("</table>");
-
-		buf.append("<h3>Access Summary</h3>");
-		buf.append("<br>Total Access Count: \n").append(totalCount);
-		buf.append("<br>Total Cost Time: \n").append(
-				formatLong(totolCost / 1000000));
-		if (totalCount != 0) {
-			buf.append("<br>Average Execute Cost Time: \n").append(
-					formatLong(totolCost / totalCount / 1000000));
+			return sb.toString();
 		}
 
-		return buf.toString();
+		if (null == watchMap.get(String.valueOf(key))) {
+			return "Unknow report key: " + key;
+		}
+
+		return watchMap.get(String.valueOf(key)).toString(format);
+
 	}
-	
-	private String formatLong(long number) {
-		return format.format(number);
-	}
+
+	DecimalFormat format = new DecimalFormat("#,##0.### ms");
 }

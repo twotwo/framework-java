@@ -16,8 +16,8 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
 import com.li3huo.netty.service.ApplicationConfig;
+import com.li3huo.netty.service.BusinessHandler;
 import com.li3huo.netty.service.ConsoleHandler;
-import com.li3huo.netty.service.HttpRequestHandler;
 
 /**
  * @author liyan
@@ -82,7 +82,7 @@ public class HttpServer implements Server {
 
 				// add customised handler
 				pipeline.addLast("handler",
-						new HttpRequestHandler(businessPort));
+						new BusinessHandler(businessPort));
 				return pipeline;
 			}
 		});

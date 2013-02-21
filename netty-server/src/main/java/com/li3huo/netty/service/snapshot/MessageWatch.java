@@ -5,14 +5,9 @@ package com.li3huo.netty.service.snapshot;
 
 import java.net.InetSocketAddress;
 
-import org.apache.log4j.Logger;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-
-import com.li3huo.netty.service.BusinessException;
-import com.li3huo.netty.service.HttpException;
 
 /**
  * @author liyan
@@ -24,10 +19,10 @@ import com.li3huo.netty.service.HttpException;
  */
 public class MessageWatch {
 	
-	private Logger log = Logger.getLogger(MessageWatch.class.getName());
+//	private Logger log = Logger.getLogger(MessageWatch.class.getName());
 	
-	public static final int State_All = 0;
-	public static final int State_Work = 1;
+	public static final int STATE_ALL = 0;
+	public static final int STATE_BUSINESS = 1;
 
 	/**
 	 * 5 stopwatch, each has starttime&endtime
@@ -42,7 +37,7 @@ public class MessageWatch {
 	 * 
 	 */
 	public MessageWatch(MessageEvent event) {
-		this.stopwatch[State_All][0] = System.nanoTime();
+		this.stopwatch[STATE_ALL][0] = System.nanoTime();
 		this.event = event;
 		this.request = (HttpRequest) event.getMessage();
 		this.remoteIP = ((InetSocketAddress) event.getRemoteAddress())
@@ -69,43 +64,33 @@ public class MessageWatch {
 	}
 
 	public long getAliveTime() {
-		if (stopwatch[State_All][1] == 0) {
-			stopwatch[State_All][1] = System.nanoTime();
+		if (stopwatch[STATE_ALL][1] == 0) {
+			stopwatch[STATE_ALL][1] = System.nanoTime();
 		}
-		return stopwatch[State_All][1] - stopwatch[State_All][0];
+		return stopwatch[STATE_ALL][1] - stopwatch[STATE_ALL][0];
 	}
 
 	public long getAliveTime(int state) {
 		if (state >= stopwatch.length) {
 			return -1;
 		}
-		if (stopwatch[State_All][1] == 0) {
+		if (stopwatch[STATE_ALL][1] == 0) {
 			stopwatch[state][1] = System.nanoTime();
 		}
 		return stopwatch[state][1] - stopwatch[state][0];
 	}
 
-	/**
-	 * Exception in business process
-	 * 
-	 * @param ex
-	 */
-	public void addException(Exception ex) {
-		if (ex instanceof BusinessException) {
-			responseCode = HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode();
-			log.fatal("code["+responseCode+",error["+ex.getMessage()+"]");
-		} else if (ex instanceof HttpException) {
-			responseCode = HttpResponseStatus.BAD_REQUEST.getCode();
-		} else {
-			responseCode = HttpResponseStatus.NOT_IMPLEMENTED.getCode();
-			log.warn("code["+responseCode+",error["+ex.getMessage()+"]");
-		}
-	}
-
 	private int responseCode = 200;
 
-	public int getResponseStatus() {
+	public int getResponseCode() {
 		return responseCode;
+	}
+
+	/**
+	 * @param responseCode the responseCode to set
+	 */
+	public void setResponseCode(int responseCode) {
+		this.responseCode = responseCode;
 	}
 
 	/**
@@ -121,5 +106,13 @@ public class MessageWatch {
 	public HttpRequest getRequest() {
 		return request;
 	}
-
+	
+	boolean bool_busi = false;
+	public boolean isBusiness() {
+		return bool_busi;
+	}
+	public void setBusiness() {
+		bool_busi = true;
+		this.start(MessageWatch.STATE_BUSINESS);
+	}
 }

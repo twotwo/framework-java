@@ -3,47 +3,29 @@
  */
 package com.li3huo.netty.service;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.getHost;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.SERVER;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.buffer.CompositeChannelBuffer;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.frame.TooLongFrameException;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 
-import com.li3huo.netty.service.snapshot.MessageWatch;
+import com.li3huo.business.BaseProcessor;
 
 /**
  * @author liyan
  * 
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
+
 	private Logger log;
 
 	public HttpRequestHandler(int port) {
@@ -52,185 +34,53 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
-		MessageWatch watch = new MessageWatch(event);
-		HttpRequest request = (HttpRequest) event.getMessage();
-		log.debug("Receive HttpRequest[" + request.getUri() + "]");
+		HttpMessageContext msgCtx = new HttpMessageContext(event);
 		try {
-			handleHttpRequest(watch);
-			// handleHttpRequest(watch);
-		} catch (Exception e) {
-			log.fatal("Handle HttpRequest[" + request.getUri() + "] Failed:"
-					+ e.getMessage());
+			HttpResponse content = getHttpResponse(msgCtx);
+			writeResponse(msgCtx, content);
+		} catch (Exception ex) {
+			msgCtx.addException(ex);
+			writeErrorResponse(msgCtx);
 		} finally {
-			// add messageWatch to Snapshot.
-			ApplicationConfig.getSnapshotService().addMessageWatch(watch);
+			msgCtx.release();
+			msgCtx = null;
 		}
 	}
 
-	public byte[] loadRequestData(HttpRequest request) {
-		byte[] bytes = null;
-		if (request.getContent() instanceof CompositeChannelBuffer) {
-			int i = ((CompositeChannelBuffer) request.getContent()).capacity();
-			bytes = new byte[i];
-			request.getContent().getBytes(0, bytes, 0, i);
-		} else {
-			bytes = request.getContent().array();
-		}
-		return bytes;
+	public HttpResponse getHttpResponse(HttpMessageContext msgCtx) throws Exception {
+		BaseProcessor processor = new BaseProcessor();
+
+		return processor.process(msgCtx);
+
+		
 	}
 
-	public void handleHttpRequest(MessageWatch watch) throws Exception {
-		writeResponse(watch.getEvent(), makeTestContent(watch.getRequest())
-				.toString());
-	}
-
-	public void handleHttpRequest(MessageEvent event, HttpRequest request)
-			throws Exception {
-		writeResponse(event, makeTestContent(request).toString());
-	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
-			throws Exception {
-
-		Throwable cause = e.getCause();
-		if (cause instanceof TooLongFrameException) {
-			sendError(ctx, BAD_REQUEST);
-			return;
-		}
-
-		cause.printStackTrace();
-		if (e.getChannel().isConnected()) {
-			sendError(ctx, INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
-		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
-		response.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
-		response.setContent(ChannelBuffers.copiedBuffer(
-				"Failure: " + status.toString() + "\r\n", CharsetUtil.UTF_8));
-		log.warn("Error code: " + status.toString());
-		// Close the connection as soon as the error message is sent.
-		ctx.getChannel().write(response)
-				.addListener(ChannelFutureListener.CLOSE);
-	}
-
-	/**
-	 * Common Method for this handler
-	 * 
-	 * @param request
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 */
-	public StringBuilder parseRequestParameter(HttpRequest request)
-			throws UnsupportedEncodingException {
-		StringBuilder buf = new StringBuilder();
-		buf.setLength(0);
-		buf.append("WELCOME TO THE WILD WILD WEB SERVER\r\n");
-		buf.append("===================================\r\n");
-
-		buf.append("VERSION: " + request.getProtocolVersion() + "\r\n");
-		buf.append("HOSTNAME: " + getHost(request, "unknown") + "\r\n");
-		buf.append("REQUEST_URI: " + request.getUri() + "\r\n\r\n");
-
-		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
-				request.getUri());
-		Map<String, List<String>> params = queryStringDecoder.getParameters();
-		if (!params.isEmpty()) {
-			for (Entry<String, List<String>> p : params.entrySet()) {
-				String key = p.getKey();
-				List<String> vals = p.getValue();
-				for (String val : vals) {
-					buf.append("PARAM: " + key + " = " + val + "\r\n");
-				}
-			}
-			buf.append("\r\n");
-		}
-		return buf;
-	}
-
-	/**
-	 * Common Method for this handler
-	 * 
-	 * @param e
-	 * @param content
-	 */
-	public void writeResponse(MessageEvent event, String content)
-			throws Exception {
-		// Build the response object.
-		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-
-		response.setContent(ChannelBuffers.copiedBuffer(content,
-				CharsetUtil.UTF_8));
-		response.setHeader(SERVER, "Netty-HTTP/1.0");
-		response.setHeader(CONTENT_TYPE, "text/html; charset=UTF-8");
-
-		HttpRequest request = (HttpRequest) event.getMessage();
-		boolean keepAlive = isKeepAlive(request);
-
-		if (keepAlive) {
-			// Add 'Content-Length' header only for a keep-alive connection.
-			response.setHeader(CONTENT_LENGTH, response.getContent()
-					.readableBytes());
-			// Add keep alive header as per:
-			// -
-			// http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-			response.setHeader(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-		}
+	public void writeResponse(HttpMessageContext msgCtx, HttpResponse response) throws Exception {
 
 		// Write the response.
-		log.debug("Channel Status [w=" + event.getChannel().isWritable()
-				+ ", o=" + event.getChannel().isOpen() + "]");
+		log.debug("Channel Status [w=" + msgCtx.event.getChannel().isWritable()
+				+ ", o=" + msgCtx.event.getChannel().isOpen() + "]");
 		ChannelFuture future = null;
 		try {
-			future = event.getChannel().write(response);
+			future = msgCtx.event.getChannel().write(response);
 		} catch (Exception ex) {
-			Exception e = new Exception("Channel Writing failed at"
-					+ request.getUri() + "[reason]" + ex.getMessage());
-			e.initCause(ex);
-			throw e;
+			ex.initCause(ex);
+			throw ex;
 		} finally {
 
-			if (!keepAlive && null != future) {
+			if (!msgCtx.isKeepAlive() && null != future) {
 				future.addListener(ChannelFutureListener.CLOSE);
 			}
 		}
-
 	}
-
-	public StringBuilder makeTestContent(HttpRequest request)
-			throws UnsupportedEncodingException {
-		StringBuilder buf = new StringBuilder();
-		buf.append("<html>");
-		buf.append("\n<body bgcolor=\"white\">");
-		buf.append("<h1> Request Information </h1>");
-		buf.append("<font size=\"4\">");
-		buf.append("<br>\nJSP Request Method: ").append(request.getMethod());
-		buf.append("<br>\nRequest URI: ").append(request.getUri());
-		buf.append("<br>\nRequest Protocol: ").append(
-				request.getProtocolVersion());
-		buf.append("<br>\nContent length: ").append(
-				request.getHeader(CONTENT_LENGTH));
-		buf.append("<br>\nContent type: ").append(
-				request.getHeader(CONTENT_TYPE));
-		buf.append("<br>\nServer name: ").append(request.getHeader(SERVER));
-
-		buf.append("<br>\nRemote host: ").append(getHost(request, "unknown"));
-
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-		buf.append("<!--          30           -->");
-
-		buf.append("<br>\n<h4>\n</font>\n</body>\n</html>");
-
-		return buf;
+	
+	public void writeErrorResponse(HttpMessageContext msgCtx) {
+		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.valueOf(msgCtx.getResponseCode()));
+		response.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
+		response.setContent(ChannelBuffers.copiedBuffer(
+				"Failure: " + msgCtx.toString() + "\r\n", CharsetUtil.UTF_8));
+		// Close the connection as soon as the error message is sent.
+		msgCtx.event.getChannel().write(response)
+				.addListener(ChannelFutureListener.CLOSE);
 	}
 }
