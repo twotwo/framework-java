@@ -13,6 +13,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import com.li3huo.business.BusinessException;
 import com.li3huo.netty.service.snapshot.MessageWatch;
 
 /**
@@ -57,7 +58,7 @@ public class HttpMessageContext {
 	 */
 	public void release() {
 		// add messageWatch to Snapshot.
-		ApplicationConfig.getSnapshotService().addMessageWatch(watch);
+		ApplicationConfig.getSnapshotService().addMessageWatch(watch, exceptions);
 		watch = null;
 	}
 

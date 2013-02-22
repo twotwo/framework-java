@@ -28,12 +28,33 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private Logger log;
 
+	/**
+	 * 
+	 * @param port
+	 *            - listening port
+	 */
 	public HttpRequestHandler(int port) {
 		this.log = Logger.getLogger("Server[" + port + "]");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.jboss.netty.channel.SimpleChannelUpstreamHandler#messageReceived(
+	 * org.jboss.netty.channel.ChannelHandlerContext,
+	 * org.jboss.netty.channel.MessageEvent)
+	 * 
+	 * Create HttpMessageContext & call getHttpResponse(HttpMessageContext)
+	 * 
+	 * If get HttpResponse, call writeResponse
+	 * 
+	 * else, call writeErrorResponse
+	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
+	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event)
+			throws Exception {
+
 		HttpMessageContext msgCtx = new HttpMessageContext(event);
 		try {
 			HttpResponse content = getHttpResponse(msgCtx);
@@ -47,15 +68,29 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 	}
 
-	public HttpResponse getHttpResponse(HttpMessageContext msgCtx) throws Exception {
+	/**
+	 * Base method for Business/Console Handler
+	 * 
+	 * @param msgCtx
+	 * @return
+	 * @throws Exception
+	 */
+	public HttpResponse getHttpResponse(HttpMessageContext msgCtx)
+			throws Exception {
 		BaseProcessor processor = new BaseProcessor();
 
 		return processor.process(msgCtx);
-
-		
 	}
 
-	public void writeResponse(HttpMessageContext msgCtx, HttpResponse response) throws Exception {
+	/**
+	 * Write Normal Content to Client
+	 * 
+	 * @param msgCtx
+	 * @param response
+	 * @throws Exception
+	 */
+	public void writeResponse(HttpMessageContext msgCtx, HttpResponse response)
+			throws Exception {
 
 		// Write the response.
 		log.debug("Channel Status [w=" + msgCtx.event.getChannel().isWritable()
@@ -73,9 +108,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			}
 		}
 	}
-	
+
+	/**
+	 * Write Error Info to Client
+	 * 
+	 * @param msgCtx
+	 */
 	public void writeErrorResponse(HttpMessageContext msgCtx) {
-		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.valueOf(msgCtx.getResponseCode()));
+		HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
+				HttpResponseStatus.valueOf(msgCtx.getResponseCode()));
 		response.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
 		response.setContent(ChannelBuffers.copiedBuffer(
 				"Failure: " + msgCtx.toString() + "\r\n", CharsetUtil.UTF_8));

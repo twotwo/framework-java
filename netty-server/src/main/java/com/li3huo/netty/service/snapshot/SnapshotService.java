@@ -5,10 +5,13 @@ package com.li3huo.netty.service.snapshot;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+
+import com.li3huo.business.BusinessException;
 
 /**
  * @author liyan
@@ -20,10 +23,10 @@ public class SnapshotService {
 		return HttpHeaders.getHost(request, "") + request.getUri();
 	}
 
-
 	public static final int WATCH_KEY_ACCESS_BY_URI = 1;
 	public static final int WATCH_KEY_ACCESS_BY_IP = 2;
 	public static final int WATCH_KEY_PROCESS_BY_STATUS = 3;
+	public static final int WATCH_KEY_Exception_BY_Type = 4;
 
 	private Map<String, SumObjectMap> watchMap = new HashMap<String, SumObjectMap>();
 
@@ -37,9 +40,12 @@ public class SnapshotService {
 
 		map = new SumObjectMap("Process Count Group By Status");
 		watchMap.put("3", map);
+
+		map = new SumObjectMap("Exception Count Group By Type");
+		watchMap.put("4", map);
 	}
 
-	public void addMessageWatch(MessageWatch watch) {
+	public void addMessageWatch(MessageWatch watch, List<Exception> exceptions) {
 		String key = watch.getRequestUri();
 		watchMap.get(String.valueOf(WATCH_KEY_ACCESS_BY_URI)).add(key, 1,
 				watch.getAliveTime());
@@ -49,6 +55,22 @@ public class SnapshotService {
 		if (watch.isBusiness()) {
 			watchMap.get(String.valueOf(WATCH_KEY_PROCESS_BY_STATUS)).add(key,
 					1, watch.getAliveTime(MessageWatch.STATE_BUSINESS));
+
+			// split count BusinessException
+			for (Exception ex : exceptions) {
+				key = ex.getClass().getName();
+				if (ex instanceof BusinessException) {
+					watchMap.get(String.valueOf(WATCH_KEY_Exception_BY_Type))
+							.add("[logic error]"+key,
+									1,
+									watch.getAliveTime(MessageWatch.STATE_BUSINESS));
+				} else {
+					watchMap.get(String.valueOf(WATCH_KEY_Exception_BY_Type))
+							.add(key,
+									1,
+									watch.getAliveTime(MessageWatch.STATE_BUSINESS));
+				}
+			}
 		}
 
 		key = watch.getRemoteIP();
@@ -61,7 +83,7 @@ public class SnapshotService {
 		// return all known report
 		if (key == 0) {
 			StringBuffer sb = new StringBuffer(1000);
-			for (int i = 1; i < 4; i++) {
+			for (int i = 1; i < 5; i++) {
 				sb.append(watchMap.get(String.valueOf(i)).toString(format));
 				sb.append("\n<br>");
 			}
