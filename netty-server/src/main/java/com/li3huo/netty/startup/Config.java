@@ -3,9 +3,6 @@
  */
 package com.li3huo.netty.startup;
 
-import org.apache.log4j.Logger;
-
-import com.li3huo.util.JSONTool;
 
 /**
  * @author liyan
@@ -21,8 +18,6 @@ public class Config {
 		return "Config [port=" + port + ", portBackend=" + portBackend + "]";
 	}
 
-	private static Logger log = Logger.getLogger(Config.class.getName());
-	
 	private int port = 8080;
 	private int portBackend = 8005;
 
@@ -52,20 +47,6 @@ public class Config {
 	 */
 	public void setPortBackend(int portBackend) {
 		this.portBackend = portBackend;
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		
-		Config config = new Config();
-		String jsonString = JSONTool.toJSONString(config);
-		log.info("encode: "+jsonString);
-		
-		jsonString= "{\"port\":80,\"portBackend\":8005}";
-		config = JSONTool.parseString2Object(jsonString, Config.class);
-		log.info("decode: "+config);
 	}
 
 }
