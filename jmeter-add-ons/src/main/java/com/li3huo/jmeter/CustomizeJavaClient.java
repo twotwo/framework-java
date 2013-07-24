@@ -1,7 +1,7 @@
 /**
  * Create at Jul 19, 2013
  */
-package li3huo.jmeter;
+package com.li3huo.jmeter;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -13,6 +13,9 @@ import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+
+import com.li3huo.util.HttpTool;
+
 
 /**
  * @author liyan
@@ -30,8 +33,8 @@ public class CustomizeJavaClient extends AbstractJavaSamplerClient implements
 
 	private String url;
 	private static final String URL_NAME = "url";
-	private static final String DEFAULT_URL_NAME = "http://localhost:8005/console";
-
+//	private static final String DEFAULT_URL_NAME = "http://localhost:8005/console";
+	private static final String DEFAULT_URL_NAME = "http://baidu.com";
 	/** The base number of milliseconds to sleep during each sample. */
 	private long sleepTime;
 
@@ -240,13 +243,17 @@ public class CustomizeJavaClient extends AbstractJavaSamplerClient implements
 	public SampleResult runTest(JavaSamplerContext context) {
 		setupValues(context);
 		SampleResult results = new SampleResult();
-
+		
 		results.setResponseCode(responseCode);
 		results.setResponseMessage(responseMessage);
 		results.setSampleLabel(label);
 
-		// do something to the url
-		System.out.println(url+success);
+		try {
+			resultData = HttpTool.doGetRequest(url, null);
+		} catch (Exception ex) {
+		}
+		
+		System.out.println("response size="+resultData.length());
 
 		if (samplerData != null && samplerData.length() > 0) {
 			results.setSamplerData(samplerData);

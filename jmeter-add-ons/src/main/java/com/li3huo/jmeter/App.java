@@ -1,4 +1,4 @@
-package li3huo.jmeter;
+package com.li3huo.jmeter;
 
 /**
  * Hello world!

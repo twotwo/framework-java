@@ -12,6 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jmeter.lib.ext>/opt/app/java/jmeter/apache-jmeter-2.9/lib/ext</jmeter.lib.ext>
 	</properties>
 
 	<dependencies>
@@ -44,11 +45,31 @@
 				<artifactId>jmeter-maven-plugin</artifactId>
 				<version>1.8.1</version>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-assembly-plugin</artifactId> 
-				<version>2.4</version> <configuration> <descriptors> <descriptor>src/assemble/assembly.xml</descriptor> 
-				</descriptors> </configuration> <executions> <execution> <id>make-assembly</id> 
-				<phase>package</phase> <goals> <goal>single</goal> </goals> </execution> 
-				</executions> </plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.8</version>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>li3huo.jmeter</groupId>
+							<artifactId>jmeter-add-ons</artifactId>
+							<version>0.0.1-SNAPSHOT</version>
+							<overWrite>true</overWrite>
+							<outputDirectory>${jmeter.lib.ext}</outputDirectory>
+						</artifactItem>
+						<artifactItem>
+							<groupId>com.alibaba</groupId>
+							<artifactId>fastjson</artifactId>
+							<version>1.1.33</version>
+							<overWrite>true</overWrite>
+							<outputDirectory>${jmeter.lib.ext}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+					<!-- other configurations here -->
+				</configuration>
+			</plugin>
 		</plugins>
+
 	</build>
 </project>
