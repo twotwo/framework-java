@@ -21,7 +21,7 @@ public class JsonTest {
 	}
 
 	@Test
-	public void checkDefaultValue() {
+	public void checkToString() {
 		
 		String expected = "{\"port\":8080,\"portBackend\":8005}";
 		

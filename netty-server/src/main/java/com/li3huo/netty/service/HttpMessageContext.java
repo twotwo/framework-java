@@ -48,7 +48,7 @@ public class HttpMessageContext {
 		this.request = (HttpRequest) event.getMessage();
 		this.watch = new MessageWatch(event);
 
-		this.requestUri = watch.getRequestUri();
+		this.requestUri = request.getUri();
 
 		keepAlive = HttpHeaders.isKeepAlive(request);
 	}

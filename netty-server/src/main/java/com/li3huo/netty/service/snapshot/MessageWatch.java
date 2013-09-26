@@ -53,7 +53,11 @@ public class MessageWatch {
 	}
 
 	public String getRequestUri() {
-		return HttpHeaders.getHost(request, "") + request.getUri();
+		return request.getUri();
+	}
+	
+	public String getHost() {
+		return HttpHeaders.getHost(request, "");
 	}
 
 	/**
