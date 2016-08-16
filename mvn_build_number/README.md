@@ -31,6 +31,8 @@ Demo for buildnumber-maven-plugin
 
 创建`<build>`标签，并在`<resources>`添加`<filtering>`；在`<plugins>`中加入`buildnumber-maven-plugin`
 
+[主要参考](https://github.com/mojohaus/mojo-parent/blob/master/pom.xml "scm的github配置")
+
 ## 配置build.properties
 
 	➜  mvn_build_number git:(master) ✗ mkdir src/main/resources/assemble
@@ -49,3 +51,10 @@ Demo for buildnumber-maven-plugin
 # 使用说明
 
 	➜  mvn_build_number git:(master) ✗ mvn clean package -Dmaven.buildNumber.doCheck=false
+
+	➜  mvn_build_number git:(master) ✗ cat target/classes/assemble/build.properties
+		server.vendor		= com.li3huo.guide.mvn
+		server.version		= 1.0-SNAPSHOT
+		server.tag		= master
+		server.buildNumber	= 18f6c
+		build_id		= ${env.BUILD_ID}

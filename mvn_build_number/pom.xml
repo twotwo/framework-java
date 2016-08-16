@@ -8,9 +8,10 @@
   <packaging>jar</packaging>
 
   <scm>
-    <connection>scm:git‌​:git://github.com/twotwo/framework-java.git</connection>
+    <connection>scm:git:https://github.com/twotwo/framework-java.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/twotwo/framework-java.git</developerConnection>
     <url>https://github.com/twotwo/framework-java/tree/master/mvn_build_number</url>
-    <developerConnection>scm:git‌​:git://github.com/twotwo/framework-java.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
 
   <dependencies>
@@ -49,6 +50,8 @@
         <configuration>
           <doCheck>true</doCheck>
           <doUpdate>true</doUpdate>
+          <!-- Git short revision ID -->
+          <shortRevisionLength>5</shortRevisionLength>
         </configuration>
       </plugin>
     </plugins>
