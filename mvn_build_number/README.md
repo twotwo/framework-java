@@ -58,3 +58,15 @@ Demo for buildnumber-maven-plugin
 		server.tag		= master
 		server.buildNumber	= 18f6c
 		build_id		= ${env.BUILD_ID}
+
+	➜  mvn_build_number git:(master) ✗ mvn exec:java -Dmaven.buildNumber.doCheck=false
+	...
+	[INFO] ------------------------------------------------------------------------
+	[INFO] Building mvn_build_number 1.0
+	[INFO] ------------------------------------------------------------------------
+	[INFO] 
+	[INFO] --- exec-maven-plugin:1.4.0:java (default-cli) @ mvn_build_number ---
+	server.version: 1.0
+	Server Vendor: com.li3huo.guide.mvn
+	SCM Branch:   master
+	Build Number:  e4bf3
