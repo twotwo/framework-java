@@ -104,7 +104,7 @@ Create Folder and file
 `App.java & AppTest.java`
 
 	➜  mvn_archetype_server git:(master) ✗  cd src/main/resources/archetype-resources/
-	➜  archetype-resources git:(master) ✗ mkdir -p src/main/java/com/li3huo src/test/java/com/li3huo
+	➜  archetype-resources git:(master) ✗ mkdir -p src/main/java/ src/test/java/
 
 ## Install the archetype and run the archetype plugin
 Final Structure
@@ -124,13 +124,10 @@ Final Structure
 	                └── src
 	                    ├── main
 	                    │   └── java
-	                    │       └── com
-	                    │           └── li3huo
-	                    │               └── App.java
+	                    │       └── App.java
 	                    └── test
 	                        └── java
-	                            └── com
-	                                └── li3huo
+	                            └── AppTest.java
 
 	15 directories, 5 files
 

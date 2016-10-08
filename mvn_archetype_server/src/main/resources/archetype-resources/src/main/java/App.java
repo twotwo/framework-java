@@ -1,4 +1,4 @@
-package com.li3huo;
+package ${groupId};
 
 /**
  * Hello world!

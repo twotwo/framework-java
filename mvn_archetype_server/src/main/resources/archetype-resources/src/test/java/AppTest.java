@@ -1,4 +1,4 @@
-package com.li3huo;
+package ${groupId};
 
 import org.junit.After;
 import org.junit.Assert;
@@ -27,7 +27,7 @@ public class AppTest {
 
 	@Test
 	public void test() {
-		Assert.assertTrue("abc","abc");
+		Assert.assertEquals("abc","abc");
 	}
 
 }
