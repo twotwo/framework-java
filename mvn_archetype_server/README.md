@@ -2,12 +2,13 @@
 
 ## Reference
 * [Guide to Creating Archetypes](https://maven.apache.org/guides/mini/guide-creating-archetypes.html)
+* [Maven Archetypes](http://wiki.li3huo.com/mvn_archetypes)
 
 ## Overview
 An archetype is made up of:
 
 1. a pom for the archetype (pom.xml in the archetype's root directory).
-1. an archetype descriptor (archetype.xml in directory: src/main/resources/META-INF/maven/)
+1. an archetype descriptor (archetype.xml/archetype-metadata.xml in directory: src/main/resources/META-INF/maven/)
 1. prototype files that are copied by the archetype plugin (directory: src/main/resources/archetype-resources/)
 1. prototype pom (pom.xml in: src/main/resources/archetype-resources)
 
@@ -29,13 +30,13 @@ Create Folder and file
 		<packaging>jar</packaging>
 	</project>
 
-## Create the archetype descriptor
+## Create the archetype descriptor(V2.x)
 Create Folder and file
 
 	➜  mvn_archetype_server git:(master) ✗ mkdir -p src/main/resources/META-INF/maven/
 	➜  mvn_archetype_server git:(master) ✗ st src/main/resources/META-INF/maven/archetype.xml
 
-`archetype.xml`
+`archetype.xml`: v1.x
 
 	<archetype xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype/1.0.0 http://maven.apache.org/xsd/archetype-1.0.0.xsd">
 		<id>mvn-archetype-server</id>
@@ -46,6 +47,12 @@ Create Folder and file
 			<source>src/test/java/com/li3huo/AppTest.java</source>
 		</testSources>
 	</archetype>
+
+`archetype-metadata.xml`: [v2.x config](http://wiki.li3huo.com/mvn_archetypes#Create_the_archetype_descriptor_V2)
+
+	➜  maven git:(master) ✗ rm archetype.xml 
+	➜  maven git:(master) ✗ st archetype-metadata.xml
+
 
 
 ## Create the prototype files and the prototype pom.xml
@@ -111,7 +118,7 @@ Final Structure
 	        └── resources
 	            ├── META-INF
 	            │   └── maven
-	            │       └── archetype.xml
+	            │       └── archetype-metadata.xml(archetype.xml)
 	            └── archetype-resources
 	                ├── pom.xml
 	                └── src
