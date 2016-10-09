@@ -3,6 +3,7 @@
 ## Reference
 * [Guide to Creating Archetypes](https://maven.apache.org/guides/mini/guide-creating-archetypes.html)
 * [Maven Archetypes](http://wiki.li3huo.com/mvn_archetypes)
+* [Commons CLI - Usage Scenarios](http://commons.apache.org/proper/commons-cli/usage.html)
 
 ## Overview
 An archetype is made up of:
@@ -153,3 +154,5 @@ Generate a project
       -DgroupId=com.li3huo.maven                   \
       -DartifactId=mvn_test
 
+[WARNING] Archetype not found in any catalog. Falling back to central repository (http://repo.maven.apache.org/maven2).
+[WARNING] Use -DarchetypeRepository=<your repository> if archetype's repository is elsewhere.
