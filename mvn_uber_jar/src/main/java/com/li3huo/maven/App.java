@@ -11,6 +11,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import com.li3huo.service.TimeServer;
+
 /**
  * 
  * @author liyan
@@ -26,9 +28,12 @@ public class App {
 
 			Option help = new Option("help", "print this message");
 			Option version = new Option("version", "print the version information and exit");
+			//https://tools.ietf.org/html/rfc868
+			Option server = new Option("server", "start a time server.");
 
 			options = new Options();
 			options.addOption(help);
+			options.addOption(server);
 			options.addOption(version);
 			options.addOption("t", false, "display current time");
 		}
@@ -54,6 +59,10 @@ public class App {
 				return;
 			}
 			
+			if (cmd.hasOption("server")) {
+				new TimeServer().run();
+			}
+			
 			if (cmd.hasOption("version")) {
 				//@TODO 与Build Number Maven Plugin集成
 				return;
@@ -71,6 +80,8 @@ public class App {
 			// oops, something went wrong
 			System.err.println("Parsing failed.  Reason: " + ex.getMessage());
 
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 
 	}

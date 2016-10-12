@@ -77,3 +77,17 @@ Tools used :
 ### Review It
 	➜  mvn_uber_jar git:(master) ✗ jar tf target/webserver.jar
 
+## Netty TimeServer Sample(com.li3huo.service)
+* [User guide for 4.x](http://netty.io/wiki/user-guide-for-4.x.html)
+
+### Start time server
+
+	➜  mvn_uber_jar git:(master) ✗ sudo java -jar target/webserver.jar -server
+
+### Print Time
+
+	➜  w2016 rdate -p localhost
+	rdate: [localhost]	Wed Oct 12 19:20:24 2016
+
+	
+
