@@ -40,19 +40,24 @@ Tools used :
 
 ## Interface
 
-### 登录验证接口(SDK -> SDK-Server)
-URL: https://<url>/api/<game_id>/LoginAuth/<channel_name>/
+### 登录验证接口(Game-Server -> SDK-Agent-Server)
+完整流程: Unity -> SDK-Agent -> Unity -> (Game-Server -> SDK-Agent-Server)
+URL: https://<url>/api/<game_id>/LoginAuth/
 Method: HTTP POST
 
-输入参数: json
+输入参数: 透传
 
-返回结果: match:true|false;
+返回结果: JSON String: {"match":true|false, "channel":"feiliu|uc|360|..", "userid":"<channel user id>",..}
 
 
-	➜  sdk-server git:(master) ✗ curl -X POST --data-binary @conf/login.json http://localhost:8000/api/123/LoginAuth/cc
-	{"match":false,"sign":"E1ILPK5vIH+X0UVGS3gRd6+nST3CjJDl6GKt6tEvRUwOBoG9UHo3t9ESQVvKhnISa0dDEFaX6TOkLjhvR3hzUD2zqgA5UlBHqJ9Jys9mLNN5TBt9C25XkQpQ8mrvOvRcA7zyYwzbSdJiCz4zda4zoknehWWLQjI2ZovqOwGJgoXxiOCywUmm1Zu3RJ4kYKboBifPRA1u+KTJ/hSCaawTPFTv3MwUvmM8WAjpy9VRuXEpK137ADM/69Y1Jna8p9SqoUE/sB2jVvWsgj9+4sWCWfiH08IaKuc8gkCjl0zvwGUeDDOYVZP/RH7HlrRSliOc0kM3HfshjGAVaftVZWG6Kg==","timestamp":"1489051858","userId":"1067335"}% 
+	➜  sdk-server git:(master) ✗ curl -X POST --data-binary @conf/login.json http://localhost:8000/api/123/LoginAuth/
+	{"match":true,"sign":"E1ILPK5vIH+X0UVGS3gRd6+nST3CjJDl6GKt6tEvRUwOBoG9UHo3t9ESQVvKhnISa0dDEFaX6TOkLjhvR3hzUD2zqgA5UlBHqJ9Jys9mLNN5TBt9C25XkQpQ8mrvOvRcA7zyYwzbSdJiCz4zda4zoknehWWLQjI2ZovqOwGJgoXxiOCywUmm1Zu3RJ4kYKboBifPRA1u+KTJ/hSCaawTPFTv3MwUvmM8WAjpy9VRuXEpK137ADM/69Y1Jna8p9SqoUE/sB2jVvWsgj9+4sWCWfiH08IaKuc8gkCjl0zvwGUeDDOYVZP/RH7HlrRSliOc0kM3HfshjGAVaftVZWG6Kg==","timestamp":"1489051858","userId":"1067335"}% 
 
 ### 支付统计接口(Channel -> SDK-Server -> Game-Server)
 SDK-Server URL: https://<url>/api/<game_id>/PayNotify/<channel_name>/
 
-Game-Server URL: 
+Game-Server URL: Game_Server_URL
+
+传入参数: JSON String: {}
+
+➜  sdk-server git:(master) ✗ curl -X POST --data-binary @conf/pay.json http://localhost:8000/api/123/PayNotify/cc/

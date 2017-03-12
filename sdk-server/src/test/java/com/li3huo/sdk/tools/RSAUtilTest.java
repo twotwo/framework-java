@@ -4,6 +4,7 @@
 package com.li3huo.sdk.tools;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -16,7 +17,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
@@ -48,7 +51,8 @@ public class RSAUtilTest {
 		logger.error("ssh-keygen -e -m pem -f /tmp/key > /tmp/key.pub");
 		
 		try {
-			RSAUtil.generateKeyPair("/tmp/key");
+			//uncomment to crreat key pair
+//			RSAUtil.generateKeyPair("/tmp/key");
 			
 			pubKey = RSAUtil.loadPublicKey("/tmp/key.pub");
 			priKey = RSAUtil.loadPrivateKey("/tmp/key");
@@ -85,14 +89,15 @@ public class RSAUtilTest {
 	@Test
 	public void pubKeyEnc2priKeyDec() {
 		String txt = "eat your own dog food!\n宁愿做过了后悔,也不要错过了后悔！";
-		
+		StopWatch sw = new StopWatch();
 		try {
 			
+			sw.start();
 			String ciphertxt = Base64.encodeBase64String(RSAUtil.enc(txt, pubKey));
-			logger.debug("pubKeyEnc2priKeyDec(): ciphertxt = "+ ciphertxt);
+			logger.debug("pubKeyEnc2priKeyDec(): ["+ sw + "]ciphertxt = "+ ciphertxt);
 			
 			byte[] bytes = RSAUtil.dec(Base64.decodeBase64(ciphertxt), priKey);
-			logger.debug("pubKeyEnc2priKeyDec(): txt2 = "+ StringUtils.toEncodedString(bytes, Charset.forName("UTF-8")));
+			logger.debug("pubKeyEnc2priKeyDec(): ["+ sw + "]txt2 = "+ StringUtils.toEncodedString(bytes, Charset.forName("UTF-8")));
 			
 			Assert.assertEquals("should be equal. ", txt, StringUtils.toEncodedString(bytes, Charset.forName("UTF-8")));
 		} catch (InvalidKeyException e) {
@@ -109,6 +114,21 @@ public class RSAUtilTest {
 		} catch (BadPaddingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void loadKeyFromResource() {
+		logger.debug("loadKeyFromResource() key.pub = "+getClass().getResource("/test/key.pub").getPath());
+		InputStream input = this.getClass().getResourceAsStream("/test/key.pub");
+		try {
+			RSAPublicKey pubKey = RSAUtil.parsePublicKey(IOUtils.toString(input, "ISO8859-1"));
+			Assert.assertNotNull("can load pub key", pubKey);
+			if(null != input) {
+				input.close();
+			}
+		} catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			logger.fatal("loadKeyFromResource()",e);
 		}
 	}
 

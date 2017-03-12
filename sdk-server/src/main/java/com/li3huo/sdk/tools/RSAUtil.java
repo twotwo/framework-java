@@ -96,14 +96,19 @@ public class RSAUtil {
 
 		// read key from file
 		String s = FileUtils.readFileToString(new File(keyFilePath), "ISO-8859-1");
-		s = StringUtils.substringBetween(s, " KEY-----\n", "\n-----END ");
+
+		return parsePublicKey(s);
+	}
+	
+	public static RSAPublicKey parsePublicKey(String content)
+			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+		logger.debug("parsePublicKey:\n" + content);
+		content = StringUtils.substringBetween(content, " KEY-----\n", "\n-----END ");
 
 		KeyFactory kf = KeyFactory.getInstance("RSA");
-		logger.debug("loadPublicKey:\n" + s);
-
 		// PKCS8EncodedKeySpec keySpec = new
 		// PKCS8EncodedKeySpec(Base64.decodeBase64(s));
-		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(s));
+		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(content));
 		RSAPublicKey key = (RSAPublicKey) kf.generatePublic(keySpec);
 		return key;
 	}

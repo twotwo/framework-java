@@ -6,10 +6,12 @@ package com.li3huo.sdk.auth;
 import com.alibaba.fastjson.JSON;
 
 /**
+ * 渠道登录Token
+ * 
  * @author liyan
  *
  */
-public class LoginBean {
+public class TokenInfo {
 	public String sign;
 	public String timestamp;
 	public String userId;
@@ -18,8 +20,8 @@ public class LoginBean {
 	 */
 	public boolean match;
 
-	public static LoginBean parse(String text) {
-		return JSON.parseObject(text, LoginBean.class);
+	public static TokenInfo parse(String text) {
+		return JSON.parseObject(text, TokenInfo.class);
 	}
 	
 	public String toJSONString() {
