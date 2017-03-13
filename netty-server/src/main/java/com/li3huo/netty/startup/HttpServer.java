@@ -119,6 +119,7 @@ public class HttpServer implements Server {
 		log.info("Business start at " + 443);
 	}
 
+	@SuppressWarnings("unused")
 	private void startBusiness() {
 
 		/**

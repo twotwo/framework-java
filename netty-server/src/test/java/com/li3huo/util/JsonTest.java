@@ -2,6 +2,7 @@ package com.li3huo.util;
 
 import static org.junit.Assert.*;
 
+import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +10,8 @@ import com.li3huo.netty.startup.Config;
 import com.li3huo.util.JSONTool;
 
 public class JsonTest {
+	
+	static Logger logger = Logger.getLogger(JsonTest.class.getName());
 	
 	/**
 	 * Config is a javabean
@@ -27,7 +30,7 @@ public class JsonTest {
 		
 		config = new Config();
 		String jsonString = JSONTool.toJSONString(config);
-		
+		logger.info(jsonString);
 		assertEquals(expected, jsonString);
 		
 	}

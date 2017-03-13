@@ -13,6 +13,7 @@ import com.li3huo.sdk.auth.TokenInfo;
 import com.li3huo.sdk.auth.TokenValidator;
 import com.li3huo.sdk.notify.NotifyInfo;
 import com.li3huo.sdk.notify.NotifyValidator;
+import com.li3huo.sdk.notify.Voucher;
 
 /**
  * @author liyan
@@ -42,8 +43,8 @@ public class FacadeBusiness {
 			String gameId = StringUtils.substringBetween(uri, "/api/", "/LoginAuth/");
 			logger.debug("LoginAuth: gameId = " + gameId);
 			TokenInfo bean = TokenInfo.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
-			
 			TokenValidator.check_channel_sign(bean);
+			logger.debug("LoginAuth: bean = " + bean.toJSONString());
 			return bean.toJSONString();
 		}
 		
@@ -56,7 +57,22 @@ public class FacadeBusiness {
 			NotifyInfo bean = NotifyInfo.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
 			logger.debug("PayNotify: bean = " + bean.toJSONString());
 			NotifyValidator.check_channel_sign(bean);
-			return bean.toJSONString();
+			
+			
+			Voucher toGameInfo = new Voucher();
+			toGameInfo.appid = gameId;
+			toGameInfo.channel_name = channelName;
+			toGameInfo.channel_order_id = bean.florderid;
+			toGameInfo.game_order_id = bean.cporderid;
+			toGameInfo.paid = bean.match;
+			
+			if(bean.match) {
+				logger.debug("write to queue.");
+			}
+			
+			return toGameInfo.toJSONString();
+
+			
 		}
 		
 		return "URI: " + uri + "\r\n" + ctx.getHeaders() + "\r\n" + fakeProcess(request);
@@ -66,6 +82,5 @@ public class FacadeBusiness {
 		String info = StringUtils.toEncodedString(request, Charset.forName("UTF-8"));
 		info += "Size: " + request.length+ "\r\nCONTENT: " + info;
 		return info;
-
 	}
 }

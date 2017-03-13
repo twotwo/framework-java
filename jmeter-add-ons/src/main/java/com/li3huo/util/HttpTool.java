@@ -7,6 +7,7 @@ package com.li3huo.util;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -27,8 +28,8 @@ public class HttpTool {
 
 	private static Logger log = LoggingManager.getLoggerFor("HttpClient");
 
-	public static String doGetRequest(String sURL, Properties param)
-			throws Exception {
+	public static String doGetRequest(String sURL, Properties param) throws IOException
+{
 		if (null != param) {
 			sURL += "?";
 			for (String key : param.stringPropertyNames()) {

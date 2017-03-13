@@ -61,3 +61,23 @@ Game-Server URL: Game_Server_URL
 传入参数: JSON String: {}
 
 ➜  sdk-server git:(master) ✗ curl -X POST --data-binary @conf/pay.json http://localhost:8000/api/123/PayNotify/cc/
+
+
+## 服务部署
+
+	exec java -cp . -jar sdk-server.jar -server
+
+### sdk-agent.ini(supervisord)
+
+	[root@localhost /]# vi /etc/supervisord/sdk-agent.ini
+	
+	[program:sdk-agent]
+	command=/home/boss/sdk-server/run.sh
+	process_name=%(program_name)s
+	directory=/home/boss/sdk-server/
+	startsecs=1
+	;stopsignal=QUIT
+	stopwaitsecs=5
+	user=boss
+	redirect_stderr=true
+	stdout_logfile=/home/boss/sdk-server/%(program_name)s.log

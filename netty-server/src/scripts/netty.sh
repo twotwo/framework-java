@@ -63,6 +63,9 @@ OS400*) os400=true;;
 Darwin*) darwin=true;;
 esac
 
+# enable RMI
+JAVA_OPTS="-Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+
 # resolve links - $0 may be a softlink
 PRG="$0"
 

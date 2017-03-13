@@ -35,8 +35,6 @@ public class AddressDaoJDBC implements AddressDao {
 	 */
 	@Override
 	public List<Address> findAll() {
-		// TODO Auto-generated method stub
-		
 		//customer_id,?
 		return this.jdbcTemplate.query(
 				"select id,  street, city, country from address", addressMapper());

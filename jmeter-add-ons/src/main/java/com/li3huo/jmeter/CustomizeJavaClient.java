@@ -3,6 +3,7 @@
  */
 package com.li3huo.jmeter;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 
@@ -34,7 +35,7 @@ public class CustomizeJavaClient extends AbstractJavaSamplerClient implements
 	private String url;
 	private static final String URL_NAME = "url";
 //	private static final String DEFAULT_URL_NAME = "http://localhost:8005/console";
-	private static final String DEFAULT_URL_NAME = "http://baidu.com";
+	private static final String DEFAULT_URL_NAME = "http://weibo.com";
 	/** The base number of milliseconds to sleep during each sample. */
 	private long sleepTime;
 
@@ -247,10 +248,13 @@ public class CustomizeJavaClient extends AbstractJavaSamplerClient implements
 		results.setResponseCode(responseCode);
 		results.setResponseMessage(responseMessage);
 		results.setSampleLabel(label);
-
+		
 		try {
 			resultData = HttpTool.doGetRequest(url, null);
+		} catch (IOException ex) {
+			//log(XX事务 处理路径 网络异常code 其它关键信息)
 		} catch (Exception ex) {
+			//log(XX事务 处理路径 未知异常code 其它关键信息)
 		}
 		
 		System.out.println("response size="+resultData.length());

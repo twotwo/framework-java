@@ -68,6 +68,28 @@
 
 	<build>
 		<finalName>sdk-server</finalName>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<!-- <exclude>log4j2.properties</exclude> -->
+				</excludes>
+			</resource>
+		</resources>
+
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>log4j2-test.properties</exclude>
+					<exclude>application.properties</exclude>
+				</excludes>
+			</testResource>
+		</testResources>
 		<plugins>
 
 			<!-- Set a compiler level -->

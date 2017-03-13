@@ -3,6 +3,9 @@
  */
 package com.li3huo.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -19,6 +22,7 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
  *
  */
 public class NettyServer {
+	static final Logger logger = LogManager.getLogger(NettyServer.class.getName());
 	private int port;
 
 	public NettyServer(int port) {
@@ -26,6 +30,7 @@ public class NettyServer {
 	}
 
 	public void run() throws Exception {
+		logger.warn("Starting Srv on "+port);
 		// Configure the server
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -57,6 +62,7 @@ public class NettyServer {
 		} finally {
 			workerGroup.shutdownGracefully();
 			bossGroup.shutdownGracefully();
+			logger.warn("Srv Stoped.");
 		}
 	}
 
