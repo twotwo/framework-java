@@ -11,7 +11,7 @@
 
 * 方便分发(单jar)的应用层 `App.java`/`pom.xml`
 * 干净封装的Netty层 `Facade*.java`
-* 按服务ID加载配置逻辑 `FacadeBusiness.`
+* 按服务ID加载配置逻辑 注入到`FacadeBusiness.`中
 * 具体业务的处理(各服务使用自己的业务参数)
 
 ## Getting Started

@@ -10,11 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.li3huo.sdk.App;
+import com.li3huo.sdk.auth.Authenticator;
 import com.li3huo.sdk.auth.TokenInfo;
-import com.li3huo.sdk.auth.TokenValidator;
-import com.li3huo.sdk.notify.NotifyInfo;
-import com.li3huo.sdk.notify.NotifyValidator;
-import com.li3huo.sdk.notify.Voucher;
+import com.li3huo.sdk.auth.Voucher;
 
 /**
  * @author liyan
@@ -34,54 +32,45 @@ public class FacadeBusiness {
 	 */
 	public static String process(FacadeContext ctx, byte[] request) {
 		String uri = ctx.getUri();
+//		logger.debug("http method: " + ctx.getHttpMethod());
+//		logger.debug("http headers: " + ctx.getHeaders());
+//		logger.debug("http parameters: " + ctx.getParameters());
+
+		/** 路由逻辑 */
 		logger.debug("dispatch by uri: " + uri);
 		String gameId = StringUtils.substringBetween(uri, "/api/", "/");
-		String gameName = App.getProperty(gameId+".name", "Unknown");
-		logger.debug("process(): find game name [" + gameId + "] is " + gameName);
-		
-		logger.debug("headers: " + ctx.getHeaders());
-		
-		logger.debug( StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
-		
-		//CP请求登录验证: https://<url>/api/<game_id>/LoginAuth/
+		String gameName = App.getProperty(gameId + ".name", "Unknown");
+		String method = StringUtils.substringBetween(uri, gameId + "/", "/");
+		logger.debug("process(): route for [" + gameId + "]" + gameName + "." + method + "()\n"
+				+ StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
+
+		// CP请求登录验证: https://<url>/api/<game_id>/LoginAuth/
 		if (StringUtils.indexOf(uri, "/LoginAuth/") > 0) {
 			TokenInfo bean = TokenInfo.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
-			TokenValidator.check_channel_sign(bean);
-			logger.debug("LoginAuth: bean = " + bean.toJSONString());
+			Authenticator.check_login_token(bean);
+			logger.debug("LoginAuth: response()\n" + bean.toJSONString());
 			return bean.toJSONString();
 		}
-		
-		//渠道通知支付结果：https://<url>/api/<game_id>/PayNotify/<channel_name>/
+
+		// 渠道通知支付结果：https://<url>/api/<game_id>/PayNotify/<channel_name>/
 		if (StringUtils.indexOf(uri, "/PayNotify/") > 0) {
 			String channelName = StringUtils.substringBetween(uri, "/PayNotify/", "/");
 			logger.debug("PayNotify: channelName = " + channelName);
-			NotifyInfo bean = NotifyInfo.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
-			logger.debug("PayNotify: bean = " + bean.toJSONString());
-			NotifyValidator.check_channel_sign(bean);
 			
-			
-			Voucher toGameInfo = new Voucher();
-			toGameInfo.appid = gameId;
-			toGameInfo.channel_name = channelName;
-			toGameInfo.channel_order_id = bean.florderid;
-			toGameInfo.game_order_id = bean.cporderid;
-			toGameInfo.paid = bean.match;
-			
-			if(bean.match) {
-				logger.debug("write to queue.");
-			}
-			
-			return toGameInfo.toJSONString();
-
-			
+			Voucher bean = new Voucher();
+			bean.channel_name = channelName;
+			bean.game_id = gameId;
+			bean.response = "init";
+			Authenticator.certify_pay_notification(bean, ctx);
+			return bean.response;
 		}
-		
+
 		return "URI: " + uri + "\r\n" + ctx.getHeaders() + "\r\n" + fakeProcess(request);
 	}
 
 	private static String fakeProcess(byte[] request) {
 		String info = StringUtils.toEncodedString(request, Charset.forName("UTF-8"));
-		info += "Size: " + request.length+ "\r\nCONTENT: " + info;
+		info += "Size: " + request.length + "\r\nCONTENT: " + info;
 		return info;
 	}
 }

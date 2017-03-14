@@ -39,9 +39,14 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
 	static final Logger logger = LogManager.getLogger(HttpServerHandler.class.getName());
 
 	private HttpRequest request;
+
 	/** Store read content */
 	private final ByteArrayOutputStream readBuf = new ByteArrayOutputStream();
-	/** Buffer that stores the response content */
+
+	/** 存储除了inputstream之外的其余request信息 */
+	private NettyContext context;
+
+	/** Buffer that stores debug info */
 	private final StringBuilder buf = new StringBuilder();
 
 	@Override
@@ -59,22 +64,8 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
 			}
 
 			buf.setLength(0);
-			
-			// QueryStringDecoder queryStringDecoder = new
-			// QueryStringDecoder(request.uri());
-			// Map<String, List<String>> params =
-			// queryStringDecoder.parameters();
-			// if (!params.isEmpty()) {
-			// for (Entry<String, List<String>> p : params.entrySet()) {
-			// String key = p.getKey();
-			// List<String> vals = p.getValue();
-			// for (String val : vals) {
-			// buf.append("PARAM: ").append(key).append(" =
-			// ").append(val).append("\r\n");
-			// }
-			// }
-			// buf.append("\r\n");
-			// }
+			/** Set HTTP Context */
+			this.context = new NettyContext(request);
 
 			appendDecoderResult(buf, request);
 		}
@@ -141,10 +132,15 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
 
 		logger.info("[request_uri] " + request.uri() + "; [is read OK?] " + currentObj.decoderResult().isSuccess());
 
+		/** Set HTTP Context */
+		if (null == this.context) {
+			this.context = new NettyContext(request);
+		}
+
 		/**
 		 * 插入业务逻辑处理
 		 */
-		String busi_resp = FacadeBusiness.process(new NettyContext(request), readBuf.toByteArray());
+		String busi_resp = FacadeBusiness.process(this.context, readBuf.toByteArray());
 
 		// Build the response object.
 		FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,

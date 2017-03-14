@@ -10,6 +10,10 @@ import java.util.Properties;
  *
  */
 public interface FacadeContext {
+	public static final String HTTP_GET = "GET";
+	public static final String HTTP_POST = "POST";
+	
+	public String getHttpMethod();
 	/**
 	 * get HTTP URI
 	 * 
@@ -18,9 +22,19 @@ public interface FacadeContext {
 	public String getUri();
 	
 	/**
-	 * get HTTP Headers
+	 * get HTTP Header by key
 	 * 
 	 * @return
 	 */
-	public Properties getHeaders();
+	public String getHeader(String key);
+	public String getHeaders();
+	
+	/**
+	 * get HTTP Parameter by key
+	 * @param key
+	 * @return
+	 */
+	public String getParameter(String key);
+
+	public Properties getParameters();
 }
