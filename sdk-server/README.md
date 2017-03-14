@@ -6,7 +6,15 @@
 * [AnySDK/Sample_Server
 ](https://github.com/AnySDK/Sample_Server/tree/master/ServerDemo_Java)
 
-## Create Project
+
+## Features
+
+* 方便分发(单jar)的应用层 `App.java`/`pom.xml`
+* 干净封装的Netty层 `Facade*.java`
+* 按服务ID加载配置逻辑 `FacadeBusiness.`
+* 具体业务的处理(各服务使用自己的业务参数)
+
+## Getting Started
 
 Tools used :
 
@@ -15,10 +23,13 @@ Tools used :
 
 
 ### Package It
-	➜  mvn_uber_jar git:(master) ✗ mvn clean package
+	➜  sdk-server git:(master) ✗  mvn clean package -DskipTests
 
 ### Review It
-	➜  mvn_uber_jar git:(master) ✗ jar tf target/webserver.jar
+	➜  sdk-server git:(master) ✗ jar tf sdk-server.jar
+
+### Run It
+	➜  sdk-server git:(master) ✗ java -jar target/sdk-server.jar
 
 ## Netty SDK Sample(com.li3huo.service)
 * [HTTP snoop sample for 4.1](https://github.com/netty/netty/tree/4.1/example/src/main/java/io/netty/example/http/snoop)

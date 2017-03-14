@@ -1,4 +1,4 @@
-package com.li3huo.sdk;
+package com.li3huo.sdk.tools;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -16,9 +16,9 @@ import org.junit.Test;
  * @author liyan
  *
  */
-public class AppTest {
+public class PropertiesTest {
 	
-	static final Logger logger = LogManager.getLogger(AppTest.class.getName());
+	static final Logger logger = LogManager.getLogger(PropertiesTest.class.getName());
 	
 	static Properties games = new Properties();
 
@@ -37,7 +37,8 @@ public class AppTest {
 
 	@Test
 	public void test() {
-		logger.debug(games.getProperty("500006.name"));
+		logger.debug("name = "+games.getProperty("500006.name"));
+		logger.debug("debug = "+games.getProperty("500006.debug", games.getProperty("agent.debug")));
 		Assert.assertEquals("全职高手",games.getProperty("500006.name"));
 	}
 

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.li3huo.sdk.App;
 import com.li3huo.sdk.auth.TokenInfo;
 import com.li3huo.sdk.auth.TokenValidator;
 import com.li3huo.sdk.notify.NotifyInfo;
@@ -34,14 +35,16 @@ public class FacadeBusiness {
 	public static String process(FacadeContext ctx, byte[] request) {
 		String uri = ctx.getUri();
 		logger.debug("dispatch by uri: " + uri);
+		String gameId = StringUtils.substringBetween(uri, "/api/", "/");
+		String gameName = App.getProperty(gameId+".name", "Unknown");
+		logger.debug("process(): find game name [" + gameId + "] is " + gameName);
+		
 		logger.debug("headers: " + ctx.getHeaders());
 		
 		logger.debug( StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
 		
 		//CP请求登录验证: https://<url>/api/<game_id>/LoginAuth/
 		if (StringUtils.indexOf(uri, "/LoginAuth/") > 0) {
-			String gameId = StringUtils.substringBetween(uri, "/api/", "/LoginAuth/");
-			logger.debug("LoginAuth: gameId = " + gameId);
 			TokenInfo bean = TokenInfo.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
 			TokenValidator.check_channel_sign(bean);
 			logger.debug("LoginAuth: bean = " + bean.toJSONString());
@@ -50,8 +53,6 @@ public class FacadeBusiness {
 		
 		//渠道通知支付结果：https://<url>/api/<game_id>/PayNotify/<channel_name>/
 		if (StringUtils.indexOf(uri, "/PayNotify/") > 0) {
-			String gameId = StringUtils.substringBetween(uri, "/api/", "/PayNotify/");
-			logger.debug("PayNotify: gameId = " + gameId);
 			String channelName = StringUtils.substringBetween(uri, "/PayNotify/", "/");
 			logger.debug("PayNotify: channelName = " + channelName);
 			NotifyInfo bean = NotifyInfo.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
