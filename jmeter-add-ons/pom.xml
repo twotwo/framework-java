@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.1.33</version>
+			<version>1.2.28</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -61,7 +61,7 @@
 						<artifactItem>
 							<groupId>com.alibaba</groupId>
 							<artifactId>fastjson</artifactId>
-							<version>1.1.33</version>
+							<version>1.2.28</version>
 							<overWrite>true</overWrite>
 							<outputDirectory>${jmeter.lib.ext}</outputDirectory>
 						</artifactItem>
