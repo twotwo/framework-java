@@ -9,6 +9,8 @@ package com.li3huo.sdk;
  * @author liyan
  *
  */
-public interface ChannelKey {
+public interface ChannelCode {
+	public static final String feiliu = "FL";
 	public static final String qihoo = "360";
+	public static final String baidu = "BD";
 }

@@ -10,8 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.li3huo.sdk.App;
+import com.li3huo.sdk.auth.AgentToken;
 import com.li3huo.sdk.auth.Authenticator;
-import com.li3huo.sdk.auth.TokenInfo;
 import com.li3huo.sdk.auth.Voucher;
 
 /**
@@ -46,7 +46,8 @@ public class FacadeBusiness {
 
 		// CP请求登录验证: https://<url>/api/<game_id>/LoginAuth/
 		if (StringUtils.indexOf(uri, "/LoginAuth/") > 0) {
-			TokenInfo bean = TokenInfo.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
+			AgentToken bean = AgentToken.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
+			gameId = bean.appid;
 			Authenticator.check_login_token(bean);
 			logger.debug("LoginAuth: response()\n" + bean.toJSONString());
 			return bean.toJSONString();

@@ -30,6 +30,7 @@ public class App {
 	static final Logger logger = LogManager.getLogger(App.class.getName());
 	static Options options;
 	static Properties games = new Properties();
+
 	public static String getProperty(String key, String defaultValue) {
 		return games.getProperty(key, defaultValue);
 	}
@@ -42,8 +43,8 @@ public class App {
 			// https://tools.ietf.org/html/rfc868
 			// Option server = new Option("server", "-server <8000>\n\t\tstart a
 			// netty server. default on 8000");
-			Option server = Option.builder("s").longOpt("server").hasArg().argName("port").optionalArg(true).desc("start a netty server on <port>. default is 8000")
-					.build();
+			Option server = Option.builder("s").longOpt("server").hasArg().argName("port").optionalArg(true)
+					.desc("start a netty server on <port>. default is 8000").build();
 			// server.setDescription("-server <8000>\n\t\tstart a netty server.
 			// default on 8000");
 
@@ -75,10 +76,16 @@ public class App {
 		}
 	}
 
+	public static void initConfig(String file) throws Exception {
+		games.load(new FileInputStream(file));
+	}
+
 	public static void main(String[] args) throws Exception {
 		CommandLine cmd = parseCommandLine(args);
 		logger.warn("load commandline...");
-		games.load(new FileInputStream("conf/games.properties"));
+		//可以改成也根据参数加载
+		String file = "conf/games.properties";
+		initConfig(file);
 		logger.warn("load conf/games.properties...");
 		if (StringUtils.isNotBlank(games.getProperty("agent.debug"))) {
 			logger.warn("enable debug mode...");
