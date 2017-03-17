@@ -9,6 +9,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.ByteArrayOutputStream;
+import java.net.InetSocketAddress;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,14 +35,14 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 
-public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
+public class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 
-	static final Logger logger = LogManager.getLogger(HttpServerHandler.class.getName());
+	static final Logger logger = LogManager.getLogger(NettyHttpHandler.class.getName());
 
 	private HttpRequest request;
 
 	/** Store read content */
-	private final ByteArrayOutputStream readBuf = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream readStream = new ByteArrayOutputStream();
 
 	/** 存储除了inputstream之外的其余request信息 */
 	private NettyContext context;
@@ -64,8 +65,13 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
 			}
 
 			buf.setLength(0);
+
+			// set "My-Netty-RemoteIP" in header
+			InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
+			request.headers().set("My-Netty-RemoteIP", address.getAddress().getHostAddress());
+
 			/** Set HTTP Context */
-			this.context = new NettyContext(request);
+			this.context = new NettyContext(request, readStream);
 
 			appendDecoderResult(buf, request);
 		}
@@ -81,7 +87,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
 				// } catch (IOException e) {
 				// logger.error("read socket failed. ", e);
 				// }
-				readBuf.write(content.readByte());
+				readStream.write(content.readByte());
 			}
 
 			if (content.isReadable()) {
@@ -132,15 +138,16 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<Object> {
 
 		logger.info("[request_uri] " + request.uri() + "; [is read OK?] " + currentObj.decoderResult().isSuccess());
 
-		/** Set HTTP Context */
-		if (null == this.context) {
-			this.context = new NettyContext(request);
-		}
+		// /** Set HTTP Context */
+		// if (null == this.context) {
+		// this.context = new NettyContext(request, readStream);
+		// logger.info("new NettyContext()");
+		// }
 
 		/**
 		 * 插入业务逻辑处理
 		 */
-		String busi_resp = FacadeBusiness.process(this.context, readBuf.toByteArray());
+		String busi_resp = FacadeBusiness.process(this.context);
 
 		// Build the response object.
 		FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,

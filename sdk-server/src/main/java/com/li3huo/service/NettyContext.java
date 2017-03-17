@@ -3,10 +3,14 @@
  */
 package com.li3huo.service;
 
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
 
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
@@ -24,22 +28,17 @@ public class NettyContext implements FacadeContext {
 	private HttpRequest request;
 
 	/**
-	 * HTTP Headers
+	 * HTTP Input Stream
 	 */
-	private Properties headers = new Properties();;
+	private ByteArrayOutputStream input;
 
 	/**
-	 * HTTP Paraments
+	 * @param readBuf
+	 * @param request
 	 */
-	// Map<String, List<String>> params;
-	private Properties params = new Properties();;
-
-	/**
-	 * 
-	 */
-	public NettyContext(HttpRequest request) {
+	public NettyContext(HttpRequest request, ByteArrayOutputStream input) {
 		this.request = request;
-
+		this.input = input;
 		// set headers
 		HttpHeaders hh = request.headers();
 		if (!hh.isEmpty()) {
@@ -57,13 +56,28 @@ public class NettyContext implements FacadeContext {
 			for (Entry<String, List<String>> p : pp.entrySet()) {
 				String key = p.getKey();
 				List<String> vals = p.getValue();
-				for (String val : vals) {
-					this.params.setProperty(key, val);
-				}
-//				this.params.setProperty(key, p.getValue().toString());
+				if (vals != null)
+					this.params.put(key, vals.toArray(new String[vals.size()]));
+				// List<String> vals = p.getValue();
+				// for (String val : vals) {
+				// // this.params.setProperty(key, val);
+				// this.params.put(key, val);
+				// }
+				// this.params.setProperty(key, p.getValue().toString());
 			}
 		}
 	}
+
+	/**
+	 * HTTP Headers
+	 */
+	private Properties headers = new Properties();;
+
+	/**
+	 * HTTP Paraments
+	 */
+	Map<String, String[]> params = new HashMap<String, String[]>();
+	// private Properties params = new Properties();;
 
 	@Override
 	public String getHttpMethod() {
@@ -87,13 +101,34 @@ public class NettyContext implements FacadeContext {
 
 	@Override
 	public String getParameter(String key) {
-		return params.getProperty(key);
+		// return params.getProperty(key);
+		// return params.get(key);
+		return StringUtils.join(params.get(key));
 
 	}
 
 	@Override
-	public Properties getParameters() {
+	public Map<String, String[]> getParameterMap() {
 		return params;
+	}
+
+	@Override
+	public byte[] getInputStreamArray() {
+		return input.toByteArray();
+	}
+
+	@Override
+	public String getRemoteAddr() {
+		// X-Forwarded-For
+		String remoteIP = this.getHeader("X-Forwarded-For");
+		if (null == remoteIP) {
+			//set in Netty Handler
+			remoteIP = this.getHeader("My-Netty-RemoteIP");
+		}
+		// for servlet request
+		// return this.reqest.getRemoteAddr();
+
+		return remoteIP;
 	}
 
 }

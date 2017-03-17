@@ -47,7 +47,7 @@ public class NettyServer {
 							ch.pipeline().addLast(new HttpResponseEncoder());
 					        // Remove the following line if you don't want automatic content compression.
 							//ch.pipeline().addLast(new HttpContentCompressor());
-							ch.pipeline().addLast(new HttpServerHandler());
+							ch.pipeline().addLast(new NettyHttpHandler());
 						}
 					}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
 

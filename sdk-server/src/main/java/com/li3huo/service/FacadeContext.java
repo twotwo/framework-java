@@ -3,7 +3,7 @@
  */
 package com.li3huo.service;
 
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * @author liyan
@@ -36,5 +36,10 @@ public interface FacadeContext {
 	 */
 	public String getParameter(String key);
 
-	public Properties getParameters();
+//	public Properties getParameters();
+	public Map<String, String[]> getParameterMap();
+	
+	public byte[] getInputStreamArray();
+	
+	public String getRemoteAddr();
 }

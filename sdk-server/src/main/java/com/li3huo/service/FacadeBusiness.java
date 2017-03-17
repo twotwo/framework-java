@@ -30,34 +30,38 @@ public class FacadeBusiness {
 	 * @param request
 	 * @return
 	 */
-	public static String process(FacadeContext ctx, byte[] request) {
+	public static String process(FacadeContext ctx) {
 		String uri = ctx.getUri();
-//		logger.debug("http method: " + ctx.getHttpMethod());
-//		logger.debug("http headers: " + ctx.getHeaders());
-//		logger.debug("http parameters: " + ctx.getParameters());
+		// logger.debug("http method: " + ctx.getHttpMethod());
+		// logger.debug("http headers: " + ctx.getHeaders());
+		// logger.debug("http parameters: " + ctx.getParameters());
 
 		/** 路由逻辑 */
-		logger.debug("dispatch by uri: " + uri);
-		String gameId = StringUtils.substringBetween(uri, "/api/", "/");
-		String gameName = App.getProperty(gameId + ".name", "Unknown");
-		String method = StringUtils.substringBetween(uri, gameId + "/", "/");
-		logger.debug("process(): route for [" + gameId + "]" + gameName + "." + method + "()\n"
-				+ StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
+		logger.debug("["+ctx.getRemoteAddr()+"] dispatch by uri: " + uri);
+		String method = StringUtils.substringBetween(uri, "/api/", "/");
 
-		// CP请求登录验证: https://<url>/api/<game_id>/LoginAuth/
+		// CP请求登录验证: https://<url>/api/LoginAuth/
 		if (StringUtils.indexOf(uri, "/LoginAuth/") > 0) {
+			byte[] request = ctx.getInputStreamArray();
 			AgentToken bean = AgentToken.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
-			gameId = bean.appid;
+			String gameId = bean.appid;
+			String gameName = App.getProperty(gameId + ".name", "Unknown");
+			logger.debug("LoginAuth:  [" + gameId + "]" + gameName + " channelName = " + bean.channelId);
 			Authenticator.check_login_token(bean);
 			logger.debug("LoginAuth: response()\n" + bean.toJSONString());
 			return bean.toJSONString();
 		}
 
-		// 渠道通知支付结果：https://<url>/api/<game_id>/PayNotify/<channel_name>/
+		// 渠道通知支付结果：https://<url>/api/PayNotify/<channel_name>/<game_id>/
 		if (StringUtils.indexOf(uri, "/PayNotify/") > 0) {
+
 			String channelName = StringUtils.substringBetween(uri, "/PayNotify/", "/");
-			logger.debug("PayNotify: channelName = " + channelName);
-			
+			String gameId = StringUtils.substringBetween(uri, channelName + "/", "/");
+			String gameName = App.getProperty(gameId + ".name", "Unknown");
+			logger.debug("process(): route for [" + gameId + "]" + gameName + "." + method);
+
+			logger.debug("PayNotify:  [" + gameId + "]" + gameName + " channelName = " + channelName);
+
 			Voucher bean = new Voucher();
 			bean.channel_name = channelName;
 			bean.game_id = gameId;
@@ -66,12 +70,20 @@ public class FacadeBusiness {
 			return bean.response;
 		}
 
-		return "URI: " + uri + "\r\n" + ctx.getHeaders() + "\r\n" + fakeProcess(request);
+		return fakeProcess(ctx);
 	}
 
-	private static String fakeProcess(byte[] request) {
-		String info = StringUtils.toEncodedString(request, Charset.forName("UTF-8"));
-		info += "Size: " + request.length + "\r\nCONTENT: " + info;
-		return info;
+	private static String fakeProcess(FacadeContext ctx) {
+		byte[] request = ctx.getInputStreamArray();
+		/** Buffer that stores response info */
+		StringBuilder buf = new StringBuilder();
+		buf.append("URI: ").append(ctx.getUri()).append("\r\n");
+		buf.append("Headers: ").append(ctx.getHeaders()).append("\r\n");
+//		buf.append("Params: ").append(ctx.getParametersString()).append("\r\n");
+		buf.append("CONTENT: ");
+		buf.append(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
+		buf.append("\r\n");
+
+		return buf.toString();
 	}
 }
