@@ -36,7 +36,7 @@ public interface FacadeContext {
 	 */
 	public String getParameter(String key);
 
-//	public Properties getParameters();
+	public String getParameters();
 	public Map<String, String[]> getParameterMap();
 	
 	public byte[] getInputStreamArray();

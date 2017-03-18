@@ -11,7 +11,7 @@
 
 * 方便分发(单jar)的应用层 `App.java`/`pom.xml`
 * 干净封装的Netty层 `service.Netty*.java` + `service.Facade*.java`
-* 路由逻辑`FacadeBusiness.process()`中
+* 路由逻辑层 `FacadeBusiness.process()` 根据 URI 定义规则，把请求路由到指定的方法上
 * 具体业务的处理(各服务使用自己的业务参数)
 
 ## Getting Started
@@ -63,6 +63,15 @@ Method: HTTP POST
 
 	➜  sdk-server git:(master) ✗ curl -X POST --data-binary @conf/login.json http://localhost:8000/api/123/LoginAuth/
 	{"match":true,"sign":"E1ILPK5vIH+X0UVGS3gRd6+nST3CjJDl6GKt6tEvRUwOBoG9UHo3t9ESQVvKhnISa0dDEFaX6TOkLjhvR3hzUD2zqgA5UlBHqJ9Jys9mLNN5TBt9C25XkQpQ8mrvOvRcA7zyYwzbSdJiCz4zda4zoknehWWLQjI2ZovqOwGJgoXxiOCywUmm1Zu3RJ4kYKboBifPRA1u+KTJ/hSCaawTPFTv3MwUvmM8WAjpy9VRuXEpK137ADM/69Y1Jna8p9SqoUE/sB2jVvWsgj9+4sWCWfiH08IaKuc8gkCjl0zvwGUeDDOYVZP/RH7HlrRSliOc0kM3HfshjGAVaftVZWG6Kg==","timestamp":"1489051858","userId":"1067335"}% 
+
+### 订单签名接口(SDK-Agent -> SDK-Agent-Server)
+完整流程: 
+URL: https://<url>/api/SignOrder/
+Method: HTTP POST
+
+输入参数: JSON String: {"appid":"<game_id>", "channelId":"<channel_name>", "channelData":..}
+
+返回结果: JSON String: {"certified":true|false, "channel":"feiliu|uc|360|..", ""userId":"<channel user id>",..}
 
 ### 支付统计接口(Channel -> SDK-Server -> Game-Server)
 SDK-Server URL: https://<url>/api/PayNotify/<channel_name>/<game_id>/

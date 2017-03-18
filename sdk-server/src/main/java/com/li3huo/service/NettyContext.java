@@ -111,6 +111,17 @@ public class NettyContext implements FacadeContext {
 	public Map<String, String[]> getParameterMap() {
 		return params;
 	}
+	
+	@Override
+	public String getParameters() {
+		StringBuffer sb = new StringBuffer();
+		for (Entry<String, String[]> p : params.entrySet()) {
+			String key = p.getKey();
+			sb.append(key).append("=").append(StringUtils.join(p.getValue()));
+			sb.append("&");
+		}
+		return sb.toString();
+	}
 
 	@Override
 	public byte[] getInputStreamArray() {

@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.li3huo.sdk.App;
+import com.li3huo.sdk.auth.AgentOrder;
 import com.li3huo.sdk.auth.AgentToken;
 import com.li3huo.sdk.auth.Authenticator;
 import com.li3huo.sdk.auth.Voucher;
@@ -37,8 +38,9 @@ public class FacadeBusiness {
 		// logger.debug("http parameters: " + ctx.getParameters());
 
 		/** 路由逻辑 */
-		logger.debug("["+ctx.getRemoteAddr()+"] dispatch by uri: " + uri);
+		logger.debug("[" + ctx.getRemoteAddr() + "] dispatch by uri: " + uri);
 		String method = StringUtils.substringBetween(uri, "/api/", "/");
+		logger.debug("===access_info uri = "+ uri+"\nparams = ["+ctx.getParameters()+"]\nreq\n"+StringUtils.toEncodedString(ctx.getInputStreamArray(), Charset.forName("UTF-8")));
 
 		// CP请求登录验证: https://<url>/api/LoginAuth/
 		if (StringUtils.indexOf(uri, "/LoginAuth/") > 0) {
@@ -49,6 +51,18 @@ public class FacadeBusiness {
 			logger.debug("LoginAuth:  [" + gameId + "]" + gameName + " channelName = " + bean.channelId);
 			Authenticator.check_login_token(bean);
 			logger.debug("LoginAuth: response()\n" + bean.toJSONString());
+			return bean.toJSONString();
+		}
+		
+		// 给订单签名：https://<url>/api/SignOrder/
+		if (StringUtils.indexOf(uri, "/SignOrder/") > 0) {
+			byte[] request = ctx.getInputStreamArray();
+			AgentOrder bean = AgentOrder.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
+			String gameId = bean.appid;
+			String gameName = App.getProperty(gameId + ".name", "Unknown");
+			logger.debug("SignOrder:  [" + gameId + "]" + gameName + " channelName = " + bean.channelId);
+			Authenticator.sign_order(bean);
+			logger.debug("SignOrder: response()\n" + bean.toJSONString());
 			return bean.toJSONString();
 		}
 
@@ -79,7 +93,8 @@ public class FacadeBusiness {
 		StringBuilder buf = new StringBuilder();
 		buf.append("URI: ").append(ctx.getUri()).append("\r\n");
 		buf.append("Headers: ").append(ctx.getHeaders()).append("\r\n");
-//		buf.append("Params: ").append(ctx.getParametersString()).append("\r\n");
+		// buf.append("Params:
+		// ").append(ctx.getParametersString()).append("\r\n");
 		buf.append("CONTENT: ");
 		buf.append(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
 		buf.append("\r\n");
