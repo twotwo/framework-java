@@ -14,6 +14,14 @@
 * 路由逻辑层 `FacadeBusiness.process()` 根据 URI 定义规则，把请求路由到指定的方法上
 * 具体业务的处理(各服务使用自己的业务参数)
 
+	- Authenticator之 渠道 login token
+	
+		public static void check_login_token(AgentToken token) {
+			Validator v = ValidatorFactory.getValidator(token.appid, token.channelId);
+			v.check_token(token);
+			logger.debug("response\n" + token.toJSONString());
+		}
+
 ## Getting Started
 
 Tools used :

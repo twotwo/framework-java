@@ -22,4 +22,6 @@ public interface ChannelCode {
 	public static final String huawei = "HW";
 	//Vivo
 	public static final String vivo = "VV";
+	//小米
+	public static final String xiaomi = "XM";
 }

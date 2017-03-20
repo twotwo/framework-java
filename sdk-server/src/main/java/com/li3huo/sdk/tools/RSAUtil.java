@@ -5,6 +5,7 @@ package com.li3huo.sdk.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -22,7 +23,10 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -59,12 +63,16 @@ public class RSAUtil {
 		String pubKeyStr = Base64.encodeBase64String(publicKey.getEncoded());
 		logger.debug("generateKeyPair(): priKeyStr\n" + priKeyStr);
 		logger.debug("generateKeyPair(): pubKeyStr\n" + pubKeyStr);
-//		// Base64 encode first and write to file
-//		FileUtils.writeByteArrayToFile(new File(keyFilePath), Base64.encodeBase64(privateKey.getEncoded()));
-//		FileUtils.writeByteArrayToFile(new File(keyFilePath + ".pub"), Base64.encodeBase64(publicKey.getEncoded()));
-		//Write with ----
-		FileUtils.write(new File(keyFilePath), "-----BEGIN PRIVATE KEY-----\n"+priKeyStr+"\n-----END PRIVATE KEY-----","ISO8859-1");
-		FileUtils.write(new File(keyFilePath + ".pub"), "-----BEGIN PUBLIC KEY-----\n"+pubKeyStr+"\n-----END PUBLIC KEY-----","ISO8859-1");
+		// // Base64 encode first and write to file
+		// FileUtils.writeByteArrayToFile(new File(keyFilePath),
+		// Base64.encodeBase64(privateKey.getEncoded()));
+		// FileUtils.writeByteArrayToFile(new File(keyFilePath + ".pub"),
+		// Base64.encodeBase64(publicKey.getEncoded()));
+		// Write with ----
+		FileUtils.write(new File(keyFilePath),
+				"-----BEGIN PRIVATE KEY-----\n" + priKeyStr + "\n-----END PRIVATE KEY-----", "ISO8859-1");
+		FileUtils.write(new File(keyFilePath + ".pub"),
+				"-----BEGIN PUBLIC KEY-----\n" + pubKeyStr + "\n-----END PUBLIC KEY-----", "ISO8859-1");
 	}
 
 	/**
@@ -99,7 +107,7 @@ public class RSAUtil {
 
 		return parsePublicKey(s);
 	}
-	
+
 	public static RSAPublicKey parsePublicKey(String content)
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		logger.debug("parsePublicKey:\n" + content);
@@ -157,6 +165,50 @@ public class RSAUtil {
 		byte[] bytes = cipher.doFinal(data);
 		// System.out.println("time:" + (System.currentTimeMillis() - start));
 		return bytes;
+	}
+
+	/**
+	 * 转换成Hex(cp from HmacSHA1Encryption.java - xiaomi)
+	 * 
+	 * @param bytesArray
+	 */
+	public static StringBuilder bytesToHexString(byte[] bytesArray) {
+		if (bytesArray == null) {
+			return null;
+		}
+		StringBuilder sBuilder = new StringBuilder();
+		for (byte b : bytesArray) {
+			String hv = String.format("%02x", b);
+			sBuilder.append(hv);
+		}
+		return sBuilder;
+	}
+
+	/**
+	 * 使用 HMAC-SHA1 签名方法对对 encryptText 进行签名
+	 * 
+	 * (cp from HmacSHA1Encryption.java - xiaomi)
+	 * 
+	 * @param encryptData
+	 *            被签名的字符串
+	 * @param encryptKey
+	 *            密钥
+	 * @return 返回被加密后的字符串
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 * @throws Exception
+	 */
+	public static String HmacSHA1Encrypt(byte[] encryptData, String encryptKey)
+			throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
+		String MAC_NAME = "HmacSHA1";
+		byte[] data = encryptKey.getBytes("UTF-8");
+		SecretKey secretKey = new SecretKeySpec(data, MAC_NAME);
+		Mac mac = Mac.getInstance(MAC_NAME);
+		mac.init(secretKey);
+		byte[] digest = mac.doFinal(encryptData);
+		StringBuilder sBuilder = bytesToHexString(digest);
+		return sBuilder.toString();
 	}
 
 }
