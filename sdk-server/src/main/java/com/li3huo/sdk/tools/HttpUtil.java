@@ -96,6 +96,45 @@ public class HttpUtil {
 
 		return result.toString();
 	}
+	
+	public static String doPost(String sURL) throws IOException {
+
+		URL url = new URL(sURL);
+		StopWatch sw = new StopWatch();
+		sw.start();
+		debug("prepare to connect ... " + sURL);
+
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		debug("connected ... " + sw);
+		connection.setReadTimeout(ReadTimeoutMillis); // waiting for 30s as
+														// client
+		connection.setConnectTimeout(ConnectTimeoutMillis);
+		connection.setRequestMethod("POST");
+
+
+		StringBuffer buf = new StringBuffer();
+		debug("prepare to read ... " + sw);
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				// debug("reading line by line... "+sw);
+				buf.append(line);
+			}
+
+		} catch (java.io.IOException ex) {
+			logger.fatal(ex.getMessage() + "@" + sURL);
+			throw ex;
+		} finally {
+			try {
+				connection.disconnect();
+			} catch (Exception ex) {
+			}
+			sw.stop();
+			debug("read over ... " + sw);
+		}
+		return buf.toString();
+	}
 
 	public static String doPost(String sURL, String data) throws IOException {
 
@@ -158,6 +197,8 @@ public class HttpUtil {
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		debug("connected ... ");
+		// Content-Type
+//		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 		connection.setReadTimeout(ReadTimeoutMillis); // waiting for 30s as
 														// client
 		connection.setConnectTimeout(ConnectTimeoutMillis);

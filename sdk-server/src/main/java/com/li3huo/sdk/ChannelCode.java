@@ -24,4 +24,12 @@ public interface ChannelCode {
 	public static final String vivo = "VV";
 	//小米
 	public static final String xiaomi = "XM";
+	//魅族
+	public static final String meizu = "MZ";
+	
+	/**
+	 * Follow HTTP Status Code
+	 */
+	public static final int Error_Channel_Server = 500;
+	public static final int Error_Token_Timeout = 440;
 }

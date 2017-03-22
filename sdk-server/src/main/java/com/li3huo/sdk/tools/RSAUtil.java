@@ -49,10 +49,10 @@ public class RSAUtil {
 	 * @throws NoSuchAlgorithmException
 	 */
 	public static void generateKeyPair(String keyFilePath) throws IOException, NoSuchAlgorithmException {
-
 		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
 		// 密钥位数
-		keyPairGen.initialize(4096);
+		int size = 1024;
+		keyPairGen.initialize(size);
 		// Generate Key Pair
 		KeyPair keyPair = keyPairGen.generateKeyPair();
 		PublicKey publicKey = keyPair.getPublic();
@@ -89,11 +89,28 @@ public class RSAUtil {
 
 		// read key from file
 		String s = FileUtils.readFileToString(new File(keyFilePath), "ISO-8859-1");
-		s = StringUtils.substringBetween(s, " KEY-----\n", "\n-----END ");
-		logger.debug("loadPrivateKey:\n" + s);
+		logger.debug("loadPrivateKey() key:\n" + s);
+		if (StringUtils.contains(s, "KEY-----\n")) {
+			s = StringUtils.substringBetween(s, " KEY-----\n", "\n-----END ");
+		}
+		return parsePrivateKey(s);
+	}
+
+	/**
+	 * 
+	 * @param keyStr
+	 *            密钥字串(不含---- KEY -----)
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
+	public static RSAPrivateKey parsePrivateKey(String keyStr)
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+
+		logger.debug("parsePrivateKey() key:\n" + keyStr);
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 
-		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(s));
+		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(keyStr));
 		RSAPrivateKey key = (RSAPrivateKey) kf.generatePrivate(keySpec);
 
 		return key;
@@ -104,19 +121,29 @@ public class RSAUtil {
 
 		// read key from file
 		String s = FileUtils.readFileToString(new File(keyFilePath), "ISO-8859-1");
+		logger.debug("loadPublicKey() key:\n" + s);
+		if (StringUtils.contains(s, "KEY-----\n")) {
+			s = StringUtils.substringBetween(s, " KEY-----\n", "\n-----END ");
+		}
 
 		return parsePublicKey(s);
 	}
 
-	public static RSAPublicKey parsePublicKey(String content)
-			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-		logger.debug("parsePublicKey:\n" + content);
-		content = StringUtils.substringBetween(content, " KEY-----\n", "\n-----END ");
-
+	/**
+	 * 
+	 * @param keyStr
+	 *            公钥字串(不含---- KEY -----)
+	 * @return
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
+	public static RSAPublicKey parsePublicKey(String keyStr) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		logger.debug("parsePublicKey() key:\n" + keyStr);
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		// PKCS8EncodedKeySpec keySpec = new
 		// PKCS8EncodedKeySpec(Base64.decodeBase64(s));
-		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(content));
+		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.decodeBase64(keyStr));
 		RSAPublicKey key = (RSAPublicKey) kf.generatePublic(keySpec);
 		return key;
 	}
