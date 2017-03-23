@@ -31,6 +31,11 @@ public class Voucher {
 	public String total_price;
 	
 	/**
+	 * 渠道返回的支付结果
+	 */
+	public boolean pay_status;
+	
+	/**
 	 * 凭证认证结果
 	 */
 	public boolean certified;

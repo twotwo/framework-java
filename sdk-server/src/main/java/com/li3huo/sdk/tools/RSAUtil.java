@@ -14,6 +14,8 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -171,6 +173,11 @@ public class RSAUtil {
 		return bytes;
 	}
 
+	public static String enc2str(String txt, Key key) throws NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		return bytesToHexString(enc(txt, key)).toString();
+	}
+
 	/**
 	 * 
 	 * @param data:
@@ -236,6 +243,80 @@ public class RSAUtil {
 		byte[] digest = mac.doFinal(encryptData);
 		StringBuilder sBuilder = bytesToHexString(digest);
 		return sBuilder.toString();
+	}
+
+	/**
+	 * 用私钥做SHA1签名(ref from com.lenovo.pay.sign.Rsa.sign() - lenovo)
+	 * 
+	 * @param content
+	 * @param privateKey
+	 * @param input_charset
+	 * @return
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 * @throws UnsupportedEncodingException
+	 * @throws SignatureException
+	 */
+	public static String signWithSHA1WithRSA(String content, String privateKey, String input_charset)
+			throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException,
+			UnsupportedEncodingException {
+		// PKCS8EncodedKeySpec priPKCS8 = new
+		// PKCS8EncodedKeySpec(Base64.decodeBase64(privateKey));
+		// KeyFactory keyf = KeyFactory.getInstance("RSA");
+		// PrivateKey priKey = keyf.generatePrivate(priPKCS8);
+		PrivateKey priKey = parsePrivateKey(privateKey);
+		Signature signature = Signature.getInstance("SHA1WithRSA");
+		signature.initSign(priKey);
+		signature.update(content.getBytes(input_charset));
+		byte signed[] = signature.sign();
+		return Base64.encodeBase64String(signed);
+	}
+
+	/**
+	 * 用私钥对内容做签名
+	 * 
+	 * @param content
+	 * @param priKey
+	 * @param dsa
+	 *            数字签名算法 SHA1WithRSA,
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws InvalidKeyException
+	 * @throws SignatureException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String sign(byte[] content, PrivateKey priKey, String dsa) throws NoSuchAlgorithmException,
+			InvalidKeySpecException, InvalidKeyException, SignatureException, UnsupportedEncodingException {
+		Signature signature = Signature.getInstance(dsa);
+		signature.initSign(priKey);
+		signature.update(content);
+		byte signed[] = signature.sign();
+		return Base64.encodeBase64String(signed);
+	}
+
+	/**
+	 * 用公钥校验签名
+	 * 
+	 * @param data
+	 * @param sign
+	 * @param pubKey
+	 * @param dsa(数字摘要算法): SHA256WithRSA/SHA1WithRSA/MD5withRSA
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws InvalidKeyException
+	 * @throws SignatureException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static boolean verify(byte[] data, String sign, PublicKey pubKey, String dsa)
+			throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException,
+			UnsupportedEncodingException {
+		Signature signature = Signature.getInstance(dsa);
+		signature.initVerify(pubKey);
+		signature.update(data);
+		return signature.verify(Base64.decodeBase64(sign));
 	}
 
 }

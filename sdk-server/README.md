@@ -11,10 +11,10 @@
 
 * 方便分发(单jar)的应用层 `App.java`/`pom.xml`
 * 干净封装的Netty层 `service.Netty*.java` + `service.Facade*.java`
-* 路由逻辑层 `FacadeBusiness.process()` 根据 URI 定义规则，把请求路由到指定的方法上
-* 具体业务的处理(各服务使用自己的业务参数)
+* 路由逻辑层 `FacadeBusiness.process()` 根据 URI 定义规则，把请求路由到指定的类和方法上(`ValidatorFactory.getValidator(game, channel)`)
+* 具体业务的处理逻辑(渠道逻辑:Validator; 游戏参数: App.getProperties())
 
-	- Authenticator之 渠道 login token
+	- Validator_XX 之 XX渠道 login token
 	
 		public static void check_login_token(AgentToken token) {
 			Validator v = ValidatorFactory.getValidator(token.appid, token.channelId);

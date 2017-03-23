@@ -3,13 +3,14 @@
  */
 package com.li3huo.sdk.adapter;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.li3huo.sdk.App;
 import com.li3huo.sdk.auth.AgentToken;
 
 /**
@@ -23,7 +24,19 @@ import com.li3huo.sdk.auth.AgentToken;
 public abstract class ValidatorFactory {
 	private static final String prefix_class_name = "com.li3huo.sdk.adapter.Validator_";
 	static final Logger logger = LogManager.getLogger(ValidatorFactory.class.getName());
-
+	static Properties adapters = new Properties();
+	
+	static {
+		if(null == ValidatorFactory.class.getResource("adapters.properties")) {
+			logger.fatal("add adapters.properties in factory folder!");
+		}
+		try {
+			logger.debug("load class map from "+ ValidatorFactory.class.getResource("adapters.properties").getPath());
+			adapters.load(ValidatorFactory.class.getResourceAsStream("adapters.properties"));
+		} catch (IOException e) {
+			logger.fatal("failed to load class map!",e);
+		}
+	}
 	/**
 	 * 获取 <game_id>.channel.huaw<channel_name>.key的值
 	 * 
@@ -36,8 +49,8 @@ public abstract class ValidatorFactory {
 		Validator v = null;
 		
 		try {
-			//500006.channel.xiaomi.class
-			String c_name = App.getProperty(channel.toLowerCase()+".class","");
+			//xm.class
+			String c_name = adapters.getProperty(channel.toLowerCase()+".class","");
 			@SuppressWarnings("unchecked")
 			Class<Validator> classType = (Class<Validator>) Class.forName(prefix_class_name+c_name);
 			v = (Validator) ConstructorUtils.invokeConstructor(classType, game);

@@ -71,6 +71,14 @@
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<resources>
 			<resource>
+				<directory>src/main/java</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/adapters.properties</include>
+				</includes>
+			</resource>
+
+			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<excludes>

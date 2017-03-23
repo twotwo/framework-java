@@ -26,6 +26,8 @@ public interface ChannelCode {
 	public static final String xiaomi = "XM";
 	//魅族
 	public static final String meizu = "MZ";
+	//联想
+	public static final String lenovo = "LX";
 	
 	/**
 	 * Follow HTTP Status Code
