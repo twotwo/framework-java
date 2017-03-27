@@ -20,7 +20,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
  * @author liyan
  *
  */
-public class NettyContext implements FacadeContext {
+public class NettyContext extends TimeLogger implements FacadeContext {
 
 	/**
 	 * Netty HttpRequest
@@ -37,6 +37,7 @@ public class NettyContext implements FacadeContext {
 	 * @param request
 	 */
 	public NettyContext(HttpRequest request, ByteArrayOutputStream input) {
+		sw.start();
 		this.request = request;
 		this.input = input;
 		// set headers
@@ -111,7 +112,7 @@ public class NettyContext implements FacadeContext {
 	public Map<String, String[]> getParameterMap() {
 		return params;
 	}
-	
+
 	@Override
 	public String getParameters() {
 		StringBuffer sb = new StringBuffer();
@@ -133,7 +134,7 @@ public class NettyContext implements FacadeContext {
 		// X-Forwarded-For
 		String remoteIP = this.getHeader("X-Forwarded-For");
 		if (null == remoteIP) {
-			//set in Netty Handler
+			// set in Netty Handler
 			remoteIP = this.getHeader("My-Netty-RemoteIP");
 		}
 		// for servlet request

@@ -70,7 +70,11 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 			InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
 			request.headers().set("My-Netty-RemoteIP", address.getAddress().getHostAddress());
 
-			/** Set HTTP Context */
+			/**
+			 * Set HTTP Context
+			 * 
+			 * start StopWatch
+			 */
 			this.context = new NettyContext(request, readStream);
 
 			appendDecoderResult(buf, request);
@@ -144,10 +148,12 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		// logger.info("new NettyContext()");
 		// }
 
-		/**
-		 * 插入业务逻辑处理
-		 */
+		/** StopWatch: socket读入完成(r) */
+		context.logTime("r");
+		/** 插入业务逻辑处理 */
 		String busi_resp = FacadeBusiness.process(this.context);
+		/** StopWatch: 业务处理完成(p) */
+		context.logTime("p");
 
 		// Build the response object.
 		FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
@@ -183,6 +189,9 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 
 		// Write the response.
 		ctx.write(response);
+		/** StopWatch: socket写出完成(w) */
+		context.logTime("w");
+		logger.debug("===Perf Log "+context.getUri()+ " "+context.getTimeLog());
 
 		return keepAlive;
 	}

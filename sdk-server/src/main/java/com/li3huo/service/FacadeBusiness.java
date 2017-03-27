@@ -9,9 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.alibaba.fastjson.JSONArray;
 import com.li3huo.sdk.App;
 import com.li3huo.sdk.adapter.Validator;
 import com.li3huo.sdk.adapter.ValidatorFactory;
+import com.li3huo.sdk.auth.AgentKey;
 import com.li3huo.sdk.auth.AgentOrder;
 import com.li3huo.sdk.auth.AgentToken;
 import com.li3huo.sdk.auth.Authenticator;
@@ -34,26 +36,37 @@ public class FacadeBusiness {
 	 * @return
 	 */
 	public static String process(FacadeContext ctx) {
+		
 		String uri = ctx.getUri();
 		// logger.debug("http method: " + ctx.getHttpMethod());
 		// logger.debug("http headers: " + ctx.getHeaders());
 		// logger.debug("http parameters: " + ctx.getParameters());
 
 		/** 路由逻辑 */
-		logger.debug("[" + ctx.getRemoteAddr() + "] dispatch by uri: " + uri);
 		String method = StringUtils.substringBetween(uri, "/api/", "/");
-		logger.debug("===access_info uri = " + uri + "\nparams = [" + ctx.getParameters() + "]\nreq\n"
-				+ StringUtils.toEncodedString(ctx.getInputStreamArray(), Charset.forName("UTF-8")));
+		/** 服务开启debug模式的时候把所有请求打出来 */
+		if (App.getProperty("agent.debug", "false").equalsIgnoreCase("true")) {
+			logger.debug("=== Distribution Center Method = [" + method + "] [" + ctx.getRemoteAddr() + "] URI = [" + uri
+					+ "] PARAMS = [" + ctx.getParameters() + "] REQ = ["
+					+ StringUtils.toEncodedString(ctx.getInputStreamArray(), Charset.forName("UTF-8")) + "]");
+		}
 
-		// CP请求登录验证: https://<url>/api/LoginAuth/
+		/** CP请求登录验证: https://<url>/api/LoginAuth/ */
 		if (StringUtils.indexOf(uri, "/LoginAuth/") > 0) {
 			byte[] request = ctx.getInputStreamArray();
 			AgentToken bean = AgentToken.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
 			String gameId = bean.appid;
 			String gameName = App.getProperty(gameId + ".name", "Unknown");
-			logger.debug("LoginAuth:  [" + gameId + "]" + gameName + " channelName = " + bean.channelId);
-			Authenticator.check_login_token(bean);
-			logger.debug("LoginAuth: response()\n" + bean.toJSONString());
+			String channelName = bean.channelId;
+			/** LoginAuth Request */
+			logger.debug("[" + ctx.getRemoteAddr() + "] [" + gameName + "] " + gameId + ".LoginAuth." + channelName
+					+ ".request JSON=" + bean.toJSONString());
+			// Authenticator.check_login_token(bean);
+			Validator v = ValidatorFactory.getValidator(gameId, bean.channelId);
+			v.check_token(bean);
+			/** LoginAuth Response */
+			logger.debug("[" + ctx.getRemoteAddr() + "] [" + gameName + "] " + gameId + ".LoginAuth." + channelName
+					+ ".response JSON=" + bean.toJSONString());
 			return bean.toJSONString();
 		}
 
@@ -62,12 +75,14 @@ public class FacadeBusiness {
 			byte[] request = ctx.getInputStreamArray();
 			AgentOrder bean = AgentOrder.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
 			String gameId = bean.appid;
-			String gameName = App.getProperty(gameId + ".name", "Unknown");
-			logger.debug("SignOrder:  [" + gameId + "]" + gameName + " channelName = " + bean.channelId);
-			
+			String channelName = bean.channelId;
+			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".SignOrder." + channelName + ".request JSON="
+					+ bean.toJSONString());
 			Validator v = ValidatorFactory.getValidator(gameId, bean.channelId);
 			v.sign_order(bean);
-			logger.debug("SignOrder: response()\n" + bean.toJSONString());
+			/** SignOrder Response */
+			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".SignOrder." + channelName + ".response JSON="
+					+ bean.toJSONString());
 			return bean.toJSONString();
 		}
 
@@ -91,12 +106,49 @@ public class FacadeBusiness {
 			voucher.channel_name = channelName;
 			voucher.game_id = gameId;
 			voucher.response = "init";
+			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".request JSON="
+					+ voucher.toJSONString());
+
+			// TODO 尽快干掉Authenticator层
 			Authenticator.certify_pay_notification(voucher, ctx);
-			
+
 			Validator v = ValidatorFactory.getValidator(voucher.game_id, voucher.channel_name);
 			v.check_pay_notify(voucher, ctx);
-			logger.debug("voucher = " + voucher.toJSONString());
+			/** PayNotify Response */
+			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".response JSON="
+					+ voucher.toJSONString());
 			return voucher.response;
+		}
+
+		// SdkAgent来获取支付密钥：https://<url>/api/GetKey/
+		if (StringUtils.indexOf(uri, "/GetKey/") > 0) {
+			byte[] request = ctx.getInputStreamArray();
+			AgentKey bean = AgentKey.parse(StringUtils.toEncodedString(request, Charset.forName("UTF-8")));
+			JSONArray keys = bean.keys.getJSONArray("param");
+			if (null == keys || keys.size() == 0) {
+				bean.code = 404;
+				bean.msg = "param is null";
+			} else {
+
+				boolean foundAll = true;
+				for (int i = 0; i < keys.size(); i++) {
+					// 只返回带.public.标记的字段
+					// 500006.channel.huawei.public.paykey
+					String key = StringUtils.lowerCase(keys.getString(i));
+					String value = App.getProperty(bean.appid + ".channel." + bean.channelId + ".public." + key, null);
+					if (null == value) {
+						bean.code = 404;
+						bean.msg = "not a valid key";
+						foundAll = false;
+						bean.keys.put(keys.getString(i), "not a valid key");
+						break;
+					}
+					bean.keys.put(keys.getString(i), value);
+				}
+				if (foundAll)
+					bean.code = 0;
+			}
+			return bean.toJSONString();
 		}
 
 		return fakeProcess(ctx);

@@ -58,6 +58,7 @@ public class HttpUtil {
 		URL url = null;
 		try {
 			url = new URL(sURL);
+			debug("prepare to connect ... " + sURL);
 			HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
 			InputStreamReader in = new InputStreamReader(urlConn.getInputStream(), "utf-8");
 			BufferedReader buffer = new BufferedReader(in);
