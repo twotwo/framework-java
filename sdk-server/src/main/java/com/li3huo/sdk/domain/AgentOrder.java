@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.li3huo.sdk.auth;
+package com.li3huo.sdk.domain;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

@@ -142,5 +142,20 @@ public class NettyContext extends TimeLogger implements FacadeContext {
 
 		return remoteIP;
 	}
+	
+	StringBuffer status = new StringBuffer();
+
+	@Override
+	public void setStatus(int code, String msg) {
+		status.append("code=").append(code);
+		if(code != 0) {
+			status.append("\tmsg=").append(msg);
+		}
+	}
+
+	@Override
+	public String status() {
+		return status.toString();
+	}
 
 }

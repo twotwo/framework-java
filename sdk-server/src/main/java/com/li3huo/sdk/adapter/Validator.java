@@ -10,9 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.li3huo.sdk.App;
-import com.li3huo.sdk.auth.AgentOrder;
-import com.li3huo.sdk.auth.AgentToken;
-import com.li3huo.sdk.auth.Voucher;
+import com.li3huo.sdk.domain.AgentOrder;
+import com.li3huo.sdk.domain.AgentToken;
+import com.li3huo.sdk.domain.Voucher;
 import com.li3huo.service.FacadeContext;
 
 /**
@@ -74,7 +74,7 @@ public abstract class Validator {
 	 * @param ctx
 	 */
 	public void check_pay_notify(Voucher voucher, FacadeContext ctx) {
-		voucher.response = "game[" + voucher.game_id + "], channel[" + voucher.channel_name + "]: not impletent yet!";
+		voucher.response = "game[" + voucher.game_id + "], channel[" + voucher.channel_order_id + "]: not impletent yet!";
 		logger.error(voucher.response);
 	}
 }

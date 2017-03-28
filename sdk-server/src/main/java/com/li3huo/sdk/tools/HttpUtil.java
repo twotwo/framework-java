@@ -38,7 +38,7 @@ public class HttpUtil {
 		if (keyMap == null || keyMap.size() == 0) {
 			return "";
 		}
-		
+
 		StringBuffer sb = new StringBuffer();
 		for (String key : keyMap.keySet()) {
 			sb.append(key).append("=");
@@ -51,15 +51,23 @@ public class HttpUtil {
 	/**
 	 * 
 	 * @param sURL
+	 * @param headers
+	 *            HTTP Headers
 	 * @return
 	 */
-	public static String doGet(String sURL) {
+	public static String doGet(String sURL, Map<String, String> headers) {
 		StringBuilder result = new StringBuilder();
 		URL url = null;
 		try {
 			url = new URL(sURL);
 			debug("prepare to connect ... " + sURL);
 			HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+			// Set Headers
+			if (null != headers) {
+				for (String key : headers.keySet())
+					urlConn.setRequestProperty(key, headers.get(key));
+			}
+
 			InputStreamReader in = new InputStreamReader(urlConn.getInputStream(), "utf-8");
 			BufferedReader buffer = new BufferedReader(in);
 			String str = null;
@@ -97,7 +105,7 @@ public class HttpUtil {
 
 		return result.toString();
 	}
-	
+
 	public static String doPost(String sURL) throws IOException {
 
 		URL url = new URL(sURL);
@@ -111,7 +119,6 @@ public class HttpUtil {
 														// client
 		connection.setConnectTimeout(ConnectTimeoutMillis);
 		connection.setRequestMethod("POST");
-
 
 		StringBuffer buf = new StringBuffer();
 		debug("prepare to read ... " + sw);
@@ -199,7 +206,8 @@ public class HttpUtil {
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		debug("connected ... ");
 		// Content-Type
-//		connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		// connection.setRequestProperty("Content-Type",
+		// "application/x-www-form-urlencoded; charset=UTF-8");
 		connection.setReadTimeout(ReadTimeoutMillis); // waiting for 30s as
 														// client
 		connection.setConnectTimeout(ConnectTimeoutMillis);

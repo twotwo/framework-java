@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.li3huo.sdk.auth.AgentToken;
+import com.li3huo.sdk.domain.AgentToken;
 import com.li3huo.sdk.tools.HttpUtil;
 
 /**

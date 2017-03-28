@@ -38,6 +38,7 @@ import io.netty.util.CharsetUtil;
 public class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 
 	static final Logger logger = LogManager.getLogger(NettyHttpHandler.class.getName());
+	static final Logger perfLog = LogManager.getLogger("PerfLog");
 
 	private HttpRequest request;
 
@@ -191,7 +192,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<Object> {
 		ctx.write(response);
 		/** StopWatch: socket写出完成(w) */
 		context.logTime("w");
-		logger.debug("===Perf Log "+context.getUri()+ " "+context.getTimeLog());
+		perfLog.info("["+context.getUri()+ "] ["+context.status()+ "] "+context.getTimeLog());
 
 		return keepAlive;
 	}

@@ -11,7 +11,7 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.li3huo.sdk.auth.AgentToken;
+import com.li3huo.sdk.domain.AgentToken;
 
 /**
  * 根据游戏(game_id)，加载特定渠道(channel_name)的验证器

@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.alibaba.fastjson.JSONObject;
 import com.li3huo.sdk.App;
 import com.li3huo.sdk.ChannelCode;
-import com.li3huo.sdk.auth.AgentToken;
+import com.li3huo.sdk.domain.AgentToken;
 
 public class ValidatorTest {
 

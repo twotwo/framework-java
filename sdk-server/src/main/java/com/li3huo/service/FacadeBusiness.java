@@ -13,11 +13,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.li3huo.sdk.App;
 import com.li3huo.sdk.adapter.Validator;
 import com.li3huo.sdk.adapter.ValidatorFactory;
-import com.li3huo.sdk.auth.AgentKey;
-import com.li3huo.sdk.auth.AgentOrder;
-import com.li3huo.sdk.auth.AgentToken;
-import com.li3huo.sdk.auth.Authenticator;
-import com.li3huo.sdk.auth.Voucher;
+import com.li3huo.sdk.domain.AgentKey;
+import com.li3huo.sdk.domain.AgentOrder;
+import com.li3huo.sdk.domain.AgentToken;
+import com.li3huo.sdk.domain.Voucher;
 
 /**
  * @author liyan
@@ -36,7 +35,7 @@ public class FacadeBusiness {
 	 * @return
 	 */
 	public static String process(FacadeContext ctx) {
-		
+
 		String uri = ctx.getUri();
 		// logger.debug("http method: " + ctx.getHttpMethod());
 		// logger.debug("http headers: " + ctx.getHeaders());
@@ -61,12 +60,14 @@ public class FacadeBusiness {
 			/** LoginAuth Request */
 			logger.debug("[" + ctx.getRemoteAddr() + "] [" + gameName + "] " + gameId + ".LoginAuth." + channelName
 					+ ".request JSON=" + bean.toJSONString());
-			// Authenticator.check_login_token(bean);
+			/** 根据游戏ID和渠道名称(客户端要求定义为channelId)获取具体验证类 */
 			Validator v = ValidatorFactory.getValidator(gameId, bean.channelId);
 			v.check_token(bean);
 			/** LoginAuth Response */
 			logger.debug("[" + ctx.getRemoteAddr() + "] [" + gameName + "] " + gameId + ".LoginAuth." + channelName
 					+ ".response JSON=" + bean.toJSONString());
+			/** 记录业务处理结果：状态码+状态消息 */
+			ctx.setStatus(bean.code, bean.msg);
 			return bean.toJSONString();
 		}
 
@@ -83,6 +84,8 @@ public class FacadeBusiness {
 			/** SignOrder Response */
 			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".SignOrder." + channelName + ".response JSON="
 					+ bean.toJSONString());
+			/** 记录业务处理结果：状态码+状态消息 */
+			ctx.setStatus(bean.code, bean.msg);
 			return bean.toJSONString();
 		}
 
@@ -93,30 +96,25 @@ public class FacadeBusiness {
 			String gameId = StringUtils.substringBetween(uri, channelName + "/", "/");
 			String gameName = App.getProperty(gameId + ".name", "Unknown");
 			logger.debug("process(): PayNotify." + channelName + "." + gameId + "." + method);
-			if (FacadeContext.HTTP_POST.equals(method)) {
-				logger.debug("[POST]PayNotify." + channelName
-						+ StringUtils.toEncodedString(ctx.getInputStreamArray(), Charset.forName("UTF-8")));
-			} else {
-				logger.debug("[" + method + "]PayNotify." + channelName + ctx.getParameters());
-			}
 
-			logger.debug("PayNotify:  [" + gameId + "]" + gameName + " channelName = " + channelName);
+			logger.debug(gameName + " [" + method + " from " + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify."
+					+ channelName + " uri=" + ctx.getUri() + "; headers=" + ctx.getHeaders() + "; input="
+					+ StringUtils.toEncodedString(ctx.getInputStreamArray(), Charset.forName("UTF-8")));
 
 			Voucher voucher = new Voucher();
-			voucher.channel_name = channelName;
+			voucher.channelId = channelName;
 			voucher.game_id = gameId;
 			voucher.response = "init";
-			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".request JSON="
+			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".create JSON="
 					+ voucher.toJSONString());
 
-			// TODO 尽快干掉Authenticator层
-			Authenticator.certify_pay_notification(voucher, ctx);
-
-			Validator v = ValidatorFactory.getValidator(voucher.game_id, voucher.channel_name);
+			Validator v = ValidatorFactory.getValidator(voucher.game_id, voucher.channelId);
 			v.check_pay_notify(voucher, ctx);
 			/** PayNotify Response */
-			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".response JSON="
+			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".update JSON="
 					+ voucher.toJSONString());
+			/** 记录业务处理结果：状态码+状态消息 */
+			ctx.setStatus(voucher.code, voucher.msg);
 			return voucher.response;
 		}
 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.li3huo.sdk.auth;
+package com.li3huo.sdk.domain;
 
 import com.alibaba.fastjson.JSON;
 
@@ -11,46 +11,43 @@ import com.alibaba.fastjson.JSON;
  * @author liyan
  *
  */
-public class Voucher {
-	/** Channel Name*/
-	public String channel_name;
-	
-	/** User ID*/
+public class Voucher extends Domain {
+	/** User ID */
 	public String user_id;
-	
-	/** Channel Order ID*/
+
+	/** Channel Order ID */
 	public String channel_order_id;
-	
-	/** Game ID*/
+
+	/** Game ID */
 	public String game_id;
-	
-	/** Game Order ID*/
+
+	/** Game Order ID */
 	public String game_order_id;
-	
-	/** Order Price*/
+
+	/** Order Price */
 	public String total_price;
-	
+
 	/**
 	 * 渠道返回的支付结果
 	 */
 	public boolean pay_status;
-	
+
 	/**
 	 * 凭证认证结果
 	 */
 	public boolean certified;
-	
+
 	/**
 	 * 给渠道的响应
 	 */
 	public String response;
-	
+
 	public static Voucher parse(String text) {
 		return JSON.parseObject(text, Voucher.class);
 	}
-	
+
 	public String toJSONString() {
 		return JSON.toJSONString(this);
 	}
-	
+
 }
