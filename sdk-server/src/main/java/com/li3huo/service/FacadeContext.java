@@ -55,7 +55,7 @@ public interface FacadeContext {
 	 * @param msg
 	 *            状态消息
 	 */
-	public void setStatus(int code, String msg);
+	public void setStatus(String channel, int code, String msg);
 	
 	public String status();
 }

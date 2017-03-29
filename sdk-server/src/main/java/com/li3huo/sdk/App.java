@@ -29,6 +29,7 @@ public class App {
 
 	static final Logger logger = LogManager.getLogger(App.class.getName());
 	static Options options;
+	/** 游戏配置参数 */
 	static Properties games = new Properties();
 
 	public static String getProperty(String key, String defaultValue) {
@@ -83,7 +84,7 @@ public class App {
 	public static void main(String[] args) throws Exception {
 		CommandLine cmd = parseCommandLine(args);
 		logger.warn("load commandline...");
-		//可以改成也根据参数加载
+		// 可以改成也根据参数加载
 		String file = "conf/games.properties";
 		initConfig(file);
 		logger.warn("load conf/games.properties...");

@@ -10,25 +10,29 @@ package com.li3huo.sdk;
  *
  */
 public interface ChannelCode {
-	//飞流
+	// 飞流
 	public static final String feiliu = "FL";
-	//奇虎360
+	// 奇虎360
 	public static final String qihoo = "360";
-	//百度
+	// 百度
 	public static final String baidu = "BD";
-	//UC阿里游戏
-	public static final String uc = "UC";
-	//华为
+	// 当乐
+	public static final String downjoy = "DJ";
+	// 华为
 	public static final String huawei = "HW";
-	//Vivo
-	public static final String vivo = "VV";
-	//小米
-	public static final String xiaomi = "XM";
-	//魅族
-	public static final String meizu = "MZ";
-	//联想
+	// 联想
 	public static final String lenovo = "LX";
-	
+	// 魅族
+	public static final String meizu = "MZ";
+	// OPPO
+	public static final String oppo = "OP";
+	// UC阿里游戏
+	public static final String uc = "UC";
+	// Vivo
+	public static final String vivo = "VV";
+	// 小米
+	public static final String xiaomi = "XM";
+
 	/**
 	 * Follow HTTP Status Code
 	 */

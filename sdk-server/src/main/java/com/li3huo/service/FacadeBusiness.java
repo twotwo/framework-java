@@ -67,7 +67,7 @@ public class FacadeBusiness {
 			logger.debug("[" + ctx.getRemoteAddr() + "] [" + gameName + "] " + gameId + ".LoginAuth." + channelName
 					+ ".response JSON=" + bean.toJSONString());
 			/** 记录业务处理结果：状态码+状态消息 */
-			ctx.setStatus(bean.code, bean.msg);
+			ctx.setStatus(channelName, bean.code, bean.msg);
 			return bean.toJSONString();
 		}
 
@@ -85,7 +85,7 @@ public class FacadeBusiness {
 			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".SignOrder." + channelName + ".response JSON="
 					+ bean.toJSONString());
 			/** 记录业务处理结果：状态码+状态消息 */
-			ctx.setStatus(bean.code, bean.msg);
+			ctx.setStatus(channelName, bean.code, bean.msg);
 			return bean.toJSONString();
 		}
 
@@ -114,7 +114,7 @@ public class FacadeBusiness {
 			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".update JSON="
 					+ voucher.toJSONString());
 			/** 记录业务处理结果：状态码+状态消息 */
-			ctx.setStatus(voucher.code, voucher.msg);
+			ctx.setStatus(channelName, voucher.code, voucher.msg);
 			return voucher.response;
 		}
 

@@ -7,12 +7,30 @@
 ](https://github.com/AnySDK/Sample_Server/tree/master/ServerDemo_Java)
 
 
-## Features
+## Architecture
 
-* 方便分发(单jar)的应用层 `App.java`/`pom.xml`
-* 干净封装的Netty层 `service.Netty*.java` + `service.Facade*.java`
-* 路由逻辑层 `FacadeBusiness.process()` 根据 URI 定义规则，把请求路由到指定的类和方法上(`ValidatorFactory.getValidator(game, channel)`)
-* 具体业务的处理逻辑(渠道逻辑:Validator; 游戏参数: App.getProperties())
+### 应用层&容器层 `App.java`/`pom.xml` 
+* `pom.xml` 编译逻辑，如单jar打包
+* `App.java` 根据启动参数运行服务内容；同时也是程序的容器层，存放业务参数、处理实例、服务状态等信息；
+
+### 封装好的的 Netty 服务层 `service.*`
+* `service.Netty*.java` 封装 Netty HTTP 服务
+* `service.Facade*.java` FacadeContext 封装了 Netty 到业务的接口；FacadeBusiness 是业务请求路由逻辑，完全独立于 Netty
+* `service.TimeLogger.java` 服务性能日志
+
+### 业务处理层 `adapter.*`
+业务始于特定的 HTTP 请求，在`service.FacadeBusiness.process()` 中识别出具体的处理接口和初试参数；
+
+	1. 首先，根据 URI 定义规则(https://<url>/api/<Method>/cc/gg..)，解析出请求方法
+	2. 然后，根据方法不同，解析出当前请求的初试参数，如game_id和channel_name等
+	3. 获取处理当前请求的业务处理类：`Validator v = ValidatorFactory.getValidator(game, channel)`
+	4. 最后，调用处理类上的处理方法，完成请求
+
+业务处理类 `ValidatorFactory`
+
+	根据channel_name来获取实现特定渠道适配逻辑的类，根据game_id加载特定的参数
+
+渠道适配逻辑 `Validator`
 
 	- Validator_XX 之 XX渠道 login token
 	
@@ -88,7 +106,7 @@ Game-Server URL: Game_Server_URL
 
 传入参数: JSON String: {}
 
-➜  sdk-server git:(master) ✗ curl -X POST --data-binary @conf/pay.json http://localhost:8000/api/123/PayNotify/cc/
+➜  sdk-server git:(master) ✗ curl -X POST --data-binary @conf/pay.json http://localhost:8000/api/PayNotify/cc/gg
 
 
 ## 服务部署

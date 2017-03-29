@@ -19,11 +19,11 @@ public class TimeLogger {
 	private StringBuffer swLog = new StringBuffer();
 
 	public void logTime(String tag) {
-		swLog.append(tag).append(" = ").append(StringUtils.remove(sw.toString(), "00:00:0")).append("s\t");
+		swLog.append(tag).append(" = ").append(StringUtils.remove(sw.toString(), "00:00:0")).append("s, ");
 	}
 
 	public String getTimeLog() {
-//		return StringUtils.removeEnd(swLog.toString(), "\t");
-		return swLog.toString();
+		return StringUtils.removeEnd(swLog.toString(), ", ");
+//		return swLog.toString();
 	}
 }
