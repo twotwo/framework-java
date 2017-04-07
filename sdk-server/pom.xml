@@ -146,6 +146,7 @@
 									<mainClass>com.li3huo.sdk.App</mainClass>
 								</transformer>
 							</transformers>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
 						</configuration>
 					</execution>
 				</executions>

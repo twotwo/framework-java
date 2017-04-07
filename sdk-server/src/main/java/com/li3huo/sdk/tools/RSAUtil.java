@@ -274,6 +274,27 @@ public class RSAUtil {
 	}
 
 	/**
+	 * 参考 Account_Verify_Demo_Test.java (Jinli)
+	 * @param content
+	 * @param privateKey
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws InvalidKeyException
+	 * @throws SignatureException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String signWithHmacSHA1(String content, String privateKey) throws NoSuchAlgorithmException,
+			InvalidKeySpecException, InvalidKeyException, SignatureException, UnsupportedEncodingException {
+
+		Mac mac = Mac.getInstance("HmacSHA1");
+		mac.init(new SecretKeySpec(privateKey.getBytes("utf-8"), "HmacSHA1"));
+
+		byte signed[] = mac.doFinal(content.getBytes("utf-8"));
+		return Base64.encodeBase64String(signed);
+	}
+
+	/**
 	 * 用私钥对内容做签名
 	 * 
 	 * @param content
@@ -302,7 +323,8 @@ public class RSAUtil {
 	 * @param data
 	 * @param sign
 	 * @param pubKey
-	 * @param dsa(数字摘要算法): SHA256WithRSA/SHA1WithRSA/MD5withRSA
+	 * @param dsa(数字摘要算法):
+	 *            SHA256WithRSA/SHA1WithRSA/MD5withRSA
 	 * @return
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeySpecException

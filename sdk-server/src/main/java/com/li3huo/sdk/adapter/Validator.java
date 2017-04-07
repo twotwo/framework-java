@@ -3,6 +3,7 @@
  */
 package com.li3huo.sdk.adapter;
 
+import java.io.File;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,8 +22,30 @@ import com.li3huo.service.FacadeContext;
  */
 public abstract class Validator {
 	static final Logger logger = LogManager.getLogger(Validator.class.getName());
+	/** 游戏唯一标示 */
 	String game_id;
+	/** 渠道唯一标示 */
 	String channel_name;
+	/** 游戏订单生成位置 */
+	String voucher_dir;
+
+	/**
+	 * @param game_id
+	 * @param channel_name
+	 */
+	public Validator(String game_id, String channel_name) {
+		this.game_id = game_id;
+		this.channel_name = channel_name.toLowerCase();
+		this.voucher_dir = App.getProperty(game_id + ".game.pay.dir", null);
+		logger.debug(game_id + ".game.pay.dir");
+		if (this.voucher_dir == null) {
+			logger.fatal("[" + game_id + "] voucher dir is null!");
+		}
+		File f = new File(this.voucher_dir);
+		if (!f.isDirectory()) {
+			logger.fatal("[" + game_id + "] creating voucher dir " + this.voucher_dir + " status " + f.mkdirs());
+		}
+	}
 
 	/**
 	 * 获取 <game_id>.channel.huaw<channel_name>.key的值
@@ -74,7 +97,7 @@ public abstract class Validator {
 	 * @param ctx
 	 */
 	public void check_pay_notify(Voucher voucher, FacadeContext ctx) {
-		voucher.response = "game[" + voucher.game_id + "], channel[" + voucher.channel_order_id + "]: not impletent yet!";
-		logger.error(voucher.response);
+		voucher.response_to_channel = "game[" + voucher.appid + "], channel[" + voucher.channel_order_id + "]: not impletent yet!";
+		logger.error(voucher.response_to_channel);
 	}
 }

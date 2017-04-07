@@ -26,7 +26,6 @@ import com.li3huo.sdk.domain.AgentToken;
 public abstract class ValidatorFactory {
 	private static final String prefix_class_name = "com.li3huo.sdk.adapter.Validator_";
 	static final Logger logger = LogManager.getLogger(ValidatorFactory.class.getName());
-
 	/** 渠道编码到适配器类的匹配 */
 	static Properties adapters = new Properties();
 
@@ -86,11 +85,11 @@ public abstract class ValidatorFactory {
 			return v;
 		}
 
-		return new Validator() {
+		return new Validator(game, channel) {
 
 			@Override
 			public void check_token(AgentToken bean) {
-				logger.error("game[" + game + "], channel[" + channel + "]: not impletent yet!");
+				logger.fatal("game[" + game + "], channel[" + channel + "]: not impletent yet!");
 			}
 		};
 	}

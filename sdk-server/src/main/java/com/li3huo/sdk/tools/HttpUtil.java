@@ -9,13 +9,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
@@ -48,36 +57,57 @@ public class HttpUtil {
 		return StringUtils.removeEnd(sb.toString(), "&");
 	}
 
+	public static String doGet(String sURL, Map<String, String> headers) throws IOException {
+		return doGet(sURL, null, headers);
+	}
+
 	/**
 	 * 
 	 * @param sURL
+	 * @param data
 	 * @param headers
-	 *            HTTP Headers
 	 * @return
+	 * @throws IOException
 	 */
-	public static String doGet(String sURL, Map<String, String> headers) {
+	public static String doGet(String sURL, String data, Map<String, String> headers) throws IOException {
 		StringBuilder result = new StringBuilder();
 		URL url = null;
+		InputStreamReader in = null;
+
+		HttpURLConnection urlConn;
+		url = new URL(sURL);
+		debug("prepare to connect ... " + sURL);
+		urlConn = (HttpURLConnection) url.openConnection();
+
 		try {
-			url = new URL(sURL);
-			debug("prepare to connect ... " + sURL);
-			HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+
 			// Set Headers
 			if (null != headers) {
 				for (String key : headers.keySet())
 					urlConn.setRequestProperty(key, headers.get(key));
 			}
-
-			InputStreamReader in = new InputStreamReader(urlConn.getInputStream(), "utf-8");
-			BufferedReader buffer = new BufferedReader(in);
-			String str = null;
-			while ((str = buffer.readLine()) != null) {
-				result.append(str);
+			urlConn.setDoInput(true);
+			if (null != data) {
+				urlConn.setDoOutput(true);
+				PrintWriter writer = new PrintWriter(urlConn.getOutputStream());
+				writer.print(data);
+				writer.flush();
+				writer.close();
 			}
-			in.close();
-			urlConn.disconnect();
+
+			in = new InputStreamReader(urlConn.getInputStream(), "utf-8");
+
 		} catch (Exception e) {
-			e.printStackTrace();
+			in = new InputStreamReader(urlConn.getErrorStream(), "UTF-8");
+		} finally {
+			if (in != null) {
+				BufferedReader buffer = new BufferedReader(in);
+				String str = null;
+				while ((str = buffer.readLine()) != null) {
+					result.append(str);
+				}
+				in.close();
+			}
 		}
 		return result.toString();
 	}
@@ -145,6 +175,10 @@ public class HttpUtil {
 	}
 
 	public static String doPost(String sURL, String data) throws IOException {
+		return doPost(sURL, data, null);
+	}
+
+	public static String doPost(String sURL, String data, Map<String, String> headers) throws IOException {
 
 		URL url = new URL(sURL);
 		StopWatch sw = new StopWatch();
@@ -153,6 +187,13 @@ public class HttpUtil {
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		debug("connected ... " + sw);
+
+		// Set Headers
+		if (null != headers) {
+			for (String key : headers.keySet())
+				connection.setRequestProperty(key, headers.get(key));
+		}
+
 		connection.setReadTimeout(ReadTimeoutMillis); // waiting for 30s as
 														// client
 		connection.setConnectTimeout(ConnectTimeoutMillis);
@@ -185,7 +226,7 @@ public class HttpUtil {
 			}
 
 		} catch (java.io.IOException ex) {
-			logger.fatal(ex.getMessage() + "@" + sURL);
+			logger.fatal(ex.getMessage() + "@" + sURL + " Current read = " + buf.toString());
 			throw ex;
 		} finally {
 			try {
@@ -253,16 +294,73 @@ public class HttpUtil {
 		logger.debug(msg);
 	}
 
-	/**
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(String[] args) throws Exception {
-		String sURL = "http://172.27.236.15:8080/test";
-		String request = "地方地方微服私访";
-		String resp = HttpUtil.doPost(sURL, request);
-		logger.info("get response---");
-		logger.info(resp);
+	public static String doHttpsPost(String sURL, String data) throws IOException {
+		return httpSPost(sURL, data);
 	}
+
+	private static String httpSPost(String httpsUrl, String data) {
+		HttpsURLConnection connection = null;
+		String result = "";
+		InputStream in = null;
+		OutputStream out = null;
+		try {
+			// 创建SSLContext对象，并使用我们指定的信任管理器初始化
+			TrustManager[] tm = { myX509TrustManager };
+			SSLContext sslContext = SSLContext.getInstance("TLS");
+			sslContext.init(null, tm, new SecureRandom());
+			URL url = new URL(httpsUrl);
+			connection = (HttpsURLConnection) url.openConnection();
+			connection.setSSLSocketFactory(sslContext.getSocketFactory());
+			connection.setConnectTimeout(5000);
+			connection.setReadTimeout(5000);
+			connection.setDoInput(true);
+			connection.setDoOutput(true);
+			connection.setUseCaches(false);
+			connection.setRequestMethod("POST");
+			connection.connect();
+			out = connection.getOutputStream();
+			byte[] reqeuestBytesData = data.getBytes("UTF-8");
+			out.write(reqeuestBytesData);
+			in = connection.getInputStream();
+			result = IOUtils.toString(in, "UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			IOUtils.closeQuietly(in);
+			IOUtils.closeQuietly(out);
+			IOUtils.close(connection);
+		}
+		return result;
+	}
+
+	private static TrustManager myX509TrustManager = new X509TrustManager() {
+
+		/**
+		 * 该方法检查客户端的证书，若不信任该证书则抛出异常。 由于我们不需要对客户端进行认证，因此我们只需要执行默认的信任管理器的这个方法。
+		 * JSSE中，默认的信任管理器类为TrustManager。
+		 */
+		@Override
+		public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
+				throws CertificateException {
+		}
+
+		/**
+		 * 该方法检查服务器的证书，若不信任该证书同样抛出异常。通过自己实现该方法，
+		 * 可以使之信任我们指定的任何证书。在实现该方法时，也可以简单的不做任何处理， 即一个空的函数体，由于不会抛出异常，它就会信任任何证书。
+		 */
+		@Override
+		public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
+				throws CertificateException {
+		}
+
+		/**
+		 * 返回受信任的X509证书数组。
+		 */
+		@Override
+		public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			return null;
+		}
+
+	};
 
 }

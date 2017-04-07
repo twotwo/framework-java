@@ -24,7 +24,7 @@ import com.li3huo.sdk.domain.Voucher;
  */
 public class FacadeBusiness {
 	static final Logger logger = LogManager.getLogger(FacadeBusiness.class.getName());
-
+	
 	/**
 	 * 隔离Netty逻辑，转入纯粹的业务逻辑处理
 	 * 
@@ -98,24 +98,25 @@ public class FacadeBusiness {
 			logger.debug("process(): PayNotify." + channelName + "." + gameId + "." + method);
 
 			logger.debug(gameName + " [" + method + " from " + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify."
-					+ channelName + " uri=" + ctx.getUri() + "; headers=" + ctx.getHeaders() + "; input="
+					+ channelName + " uri=" + ctx.getUri() + "; headers=" + ctx.getHeaders() + "; params="
+					+ ctx.getParameters() + "; input="
 					+ StringUtils.toEncodedString(ctx.getInputStreamArray(), Charset.forName("UTF-8")));
 
 			Voucher voucher = new Voucher();
 			voucher.channelId = channelName;
-			voucher.game_id = gameId;
-			voucher.response = "init";
+			voucher.appid = gameId;
+			voucher.response_to_channel = "init";
 			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".create JSON="
 					+ voucher.toJSONString());
 
-			Validator v = ValidatorFactory.getValidator(voucher.game_id, voucher.channelId);
+			Validator v = ValidatorFactory.getValidator(voucher.appid, voucher.channelId);
 			v.check_pay_notify(voucher, ctx);
 			/** PayNotify Response */
 			logger.debug("[" + ctx.getRemoteAddr() + "] " + gameId + ".PayNotify." + channelName + ".update JSON="
 					+ voucher.toJSONString());
 			/** 记录业务处理结果：状态码+状态消息 */
 			ctx.setStatus(channelName, voucher.code, voucher.msg);
-			return voucher.response;
+			return voucher.response_to_channel;
 		}
 
 		// SdkAgent来获取支付密钥：https://<url>/api/GetKey/

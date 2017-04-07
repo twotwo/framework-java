@@ -1,8 +1,9 @@
 package com.li3huo.sdk;
 
 import java.io.FileInputStream;
-import java.util.Date;
+import java.lang.management.ManagementFactory;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,10 +14,10 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.li3huo.sdk.notify.GameNotifier;
 import com.li3huo.service.NettyServer;
 
 /**
@@ -32,28 +33,30 @@ public class App {
 	/** 游戏配置参数 */
 	static Properties games = new Properties();
 
+	/** 确保voucher文件的唯一性 */
+	static String pid;
+	static AtomicLong voucherIndex = new AtomicLong();
+
+	public static String getVoucherFileIndex() {
+		long index = voucherIndex.addAndGet(1);
+		return pid + "_" + index;
+	}
+
 	public static String getProperty(String key, String defaultValue) {
-		return games.getProperty(key, defaultValue);
+		return games.getProperty(key.toLowerCase(), defaultValue);
 	}
 
 	private static synchronized Options getOptions() {
 		if (null == options) {
 
-			Option help = new Option("help", "print this message");
-			Option version = new Option("version", "print the version information and exit");
-			// https://tools.ietf.org/html/rfc868
-			// Option server = new Option("server", "-server <8000>\n\t\tstart a
-			// netty server. default on 8000");
-			Option server = Option.builder("s").longOpt("server").hasArg().argName("port").optionalArg(true)
-					.desc("start a netty server on <port>. default is 8000").build();
-			// server.setDescription("-server <8000>\n\t\tstart a netty server.
-			// default on 8000");
-
 			options = new Options();
-			options.addOption(help);
-			options.addOption(server);
-			options.addOption(version);
-			options.addOption("t", false, "display current time");
+			options.addOption("help", "print this message");
+			options.addOption("version", "print the version information and exit");
+			// -s or --server [port]
+			options.addOption(Option.builder("s").longOpt("server").hasArg().argName("port").optionalArg(true)
+					.desc("start sdk-agent server on [port]. default is 8000").build());
+			options.addOption(Option.builder("n").longOpt("notify").hasArg().argName("game_id")
+					.desc("notify voucher to game_id. load game config from conf/games.properties").build());
 		}
 
 		return options;
@@ -67,8 +70,8 @@ public class App {
 		CommandLine cmd;
 		try {
 			cmd = parser.parse(options, args);
-			logger.debug("options: " + cmd.getOptions().length);
-			logger.debug("args: " + cmd.getArgList().size());
+			// logger.debug("options: " + cmd.getOptions().length);
+			// logger.debug("args: " + cmd.getArgList().size());
 			return cmd;
 		} catch (ParseException e) {
 			logger.fatal("parseCommandLine(): failed to parse options!", e);
@@ -79,9 +82,12 @@ public class App {
 
 	public static void initConfig(String file) throws Exception {
 		games.load(new FileInputStream(file));
+		/** 拿一下当前的进程ID，生成支付通知文件用 */
+		pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
 	}
 
 	public static void main(String[] args) throws Exception {
+
 		CommandLine cmd = parseCommandLine(args);
 		logger.warn("load commandline...");
 		// 可以改成也根据参数加载
@@ -90,6 +96,7 @@ public class App {
 		logger.warn("load conf/games.properties...");
 		if (StringUtils.isNotBlank(games.getProperty("agent.debug"))) {
 			logger.warn("enable debug mode...");
+			logger.warn("current process id = " + pid);
 		}
 
 		if (0 == cmd.getOptions().length + cmd.getArgList().size() || cmd.hasOption("help")) {
@@ -99,23 +106,25 @@ public class App {
 			return;
 		}
 
+		if (cmd.hasOption("version")) {
+			// @TODO 与Build Number Maven Plugin集成
+			return;
+		}
+
 		if (cmd.hasOption("server")) {
 			String port = cmd.getOptionValue("server", "8000");
 			logger.warn("start netty server at port " + port);
 			new NettyServer(NumberUtils.toInt(port, 8000)).run();
 		}
 
-		if (cmd.hasOption("version")) {
-			// @TODO 与Build Number Maven Plugin集成
-			return;
+		if (cmd.hasOption("notify")) {
+			String game_id = cmd.getOptionValue("notify");
+			logger.warn("starting notify process[" + game_id + "]...");
+			logger.warn("load from " + games.getProperty(game_id + ".game.pay.dir") + " to "
+					+ games.getProperty(game_id + ".game.pay.url"));
+			new Thread(new GameNotifier(game_id)).start();
+
 		}
 
-		if (cmd.hasOption("t")) {
-			// print the date and time
-			System.out.println(DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-		} else {
-			// print the date
-			System.out.println(DateFormatUtils.format(new Date(), "yyyy-MM-dd"));
-		}
 	}
 }
