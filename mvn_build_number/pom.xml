@@ -1,81 +1,78 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.li3huo.guide.mvn</groupId>
-  <artifactId>mvn_build_number</artifactId>
-  <version>1.0</version>
-  <packaging>jar</packaging>
+	<groupId>com.li3huo.guide.mvn</groupId>
+	<artifactId>mvn_build_number</artifactId>
+	<version>1.0</version>
+	<packaging>jar</packaging>
 
-  <scm>
-    <connection>scm:git:https://github.com/twotwo/framework-java.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/twotwo/framework-java.git</developerConnection>
-    <url>https://github.com/twotwo/framework-java/tree/master/mvn_build_number</url>
-    <tag>HEAD</tag>
-  </scm>
+	<scm>
+		<connection>scm:git:https://github.com/twotwo/framework-java.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/twotwo/framework-java.git</developerConnection>
+		<url>https://github.com/twotwo/framework-java/tree/master/mvn_build_number</url>
+		<tag>HEAD</tag>
+	</scm>
 
-  <dependencies>
-  	<dependency>
-  		<groupId>junit</groupId>
-  		<artifactId>junit</artifactId>
-  		<version>4.12</version>
-  	</dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+	</dependencies>
 
-  <build>
-    <finalName>${project.artifactId}-${project.version}-r${buildNumber}</finalName>
-    <sourceDirectory>src/main/java</sourceDirectory>
-    <testSourceDirectory>src/test/java</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
+	<build>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 
-    <plugins>
-      <!-- 创建 build number -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>create</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <doCheck>true</doCheck>
-          <doUpdate>true</doUpdate>
-          <!-- Git short revision ID -->
-          <shortRevisionLength>5</shortRevisionLength>
-        </configuration>
-      </plugin>
+		<plugins>
+			<!-- 创建 build number -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<doCheck>true</doCheck>
+					<doUpdate>true</doUpdate>
+					<!-- Git short revision ID -->
+					<shortRevisionLength>5</shortRevisionLength>
+				</configuration>
+			</plugin>
 
-      <!-- 直接从命令行执行 -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.4.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <mainClass>com.li3huo.guild.mvn.BuildInfo</mainClass>
-          <!-- <arguments>
-            <argument>foo</argument>
-          </arguments>-->
-        </configuration>
-      </plugin>
-    </plugins>
+			<!-- 直接从命令行执行 -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.4.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>com.li3huo.guide.mvn.BuildInfo</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
 
-  </build>
+	</build>
 
 </project>
