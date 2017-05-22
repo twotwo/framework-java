@@ -1,0 +1,49 @@
+<assembly>
+	<id>release</id>
+	<formats>
+		<format>tar.gz</format>
+		<format>dir</format>
+	</formats>
+	<dependencySets>
+		<!-- refer to http://maven.apache.org/plugins/maven-assembly-plugin/assembly.html#class_dependencySet -->
+		<dependencySet>
+			<useProjectArtifact>true</useProjectArtifact>
+			<outputDirectory></outputDirectory>
+			<excludes>
+				<exclude>*:*</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
+	<files>
+		<file>
+			<source>target/sdk-agent.jar</source>
+			<outputDirectory>/</outputDirectory>
+		</file>
+	</files>
+	<fileSets>
+		<fileSet>
+			<directory>conf</directory>
+			<outputDirectory>conf</outputDirectory>
+			<includes>
+				<include>*.properties</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0733</fileMode>
+			<includes>
+				<include>*.sh</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources/assemble</directory>
+			<outputDirectory>/logs</outputDirectory>
+			<excludes>
+				<exclude>*</exclude>
+				<exclude>*.*</exclude>
+			</excludes>
+		</fileSet>
+	</fileSets>
+
+</assembly>
