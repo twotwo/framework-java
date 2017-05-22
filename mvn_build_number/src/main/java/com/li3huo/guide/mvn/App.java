@@ -1,4 +1,4 @@
-package $com.li3huo.archetypes;
+package com.li3huo.guide.mvn;
 
 /**
  * Hello world!

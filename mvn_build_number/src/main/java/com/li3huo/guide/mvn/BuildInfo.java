@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.li3huo.guild.mvn;
+package com.li3huo.guide.mvn;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +25,9 @@ import java.util.TreeSet;
  */
 public class BuildInfo {
 
-	// ------------------------------------------------------- Static Variables
+	// -------------- Static Variables
 
+	private static Properties buildInfo = new Properties();
 	/**
 	 * The server information String with which we identify ourselves.
 	 */
@@ -39,6 +40,8 @@ public class BuildInfo {
 
 	/**
 	 * The server's version number String.
+	 * 
+	 * commit hash for git, use git show <commit_hash> to look
 	 */
 	private static String serverBuildNumber = null;
 
@@ -50,29 +53,15 @@ public class BuildInfo {
 			 * 
 			 */
 			InputStream is = BuildInfo.class.getResourceAsStream("/assemble/build.properties");
-			Properties props = new Properties();
-			props.load(is);
+			buildInfo.load(is);
 			is.close();
-			// groupId in pom.xml
-			serverVendor = props.getProperty("server.vendor");
-			System.out.println("server.version: " + props.getProperty("server.version"));
-			// SCM Branch info, ${scmBranch} in pom.xml
-			serverBranch = props.getProperty("server.tag");
-			// SCM revision info, ${buildNumber} in pom.xml
-			serverBuildNumber = props.getProperty("server.buildNumber");
 		} catch (Throwable t) {
 			System.err.println(t);
 		}
-		if (serverVendor == null)
-			serverVendor = "Netty Demo Server";
-		if (serverBranch == null)
-			serverBranch = "unknown";
-		if (serverBuildNumber == null)
-			serverBuildNumber = "unknown";
 
 	}
 
-	// --------------------------------------------------------- Public Methods
+	// ------------------- Public Methods
 
 	/**
 	 * Return the App's Vendor.
@@ -132,9 +121,11 @@ public class BuildInfo {
 	 * @param args
 	 */
 	public static void main(String[] args) throws IOException {
-		System.out.println("Server Vendor: " + getServerVendor());
-		System.out.println("SCM Branch:   " + getServerBranch());
-		System.out.println("Build Number:  " + getServerBuildNumber());
+		System.out.println("Server Vendor:	" + buildInfo.getProperty("server.vendor","Unknow"));
+		System.out.println("Server Version:	" + buildInfo.getProperty("server.version","Unknow"));
+		System.out.println("SCM Tag:	" + buildInfo.getProperty("scm.tag","Unknow"));
+		System.out.println("SCM Version:	" + buildInfo.getProperty("scm.version","Unknow"));
+		System.out.println("Build Number:	" + buildInfo.getProperty("jenkins.number","Unknow"));
 
 		if (args.length == 0) {
 			return;
