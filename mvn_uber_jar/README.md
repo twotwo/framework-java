@@ -2,13 +2,17 @@
 
 Uber-JAR就是把整个工程都放到一个jar中的行业叫法。实现方式很多，推荐使用Maven-Shade-Plugin方式。
 
-## 参考资料
+## 1. Reference
 * [Uber-JAR](http://imagej.net/Uber-JAR)
 * [Apache Maven Shade Plugin](http://maven.apache.org/plugins/maven-shade-plugin/)
 * [executable-jar-with-maven-example](https://github.com/jinahya/executable-jar-with-maven-example)
 * [Maven – Create a fat Jar file – One-JAR example](http://www.mkyong.com/maven/maven-create-a-fat-jar-file-one-jar-example/)
 
-## Create Project
+### 1.1 maven-shade-plugin
+
+	mvn shade:help -Ddetail=true
+
+## 2. Create Uber-Jar Project
 
 Tools used :
 
@@ -47,7 +51,7 @@ Tools used :
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version>
+				<version>3.0.0</version>
 				<executions>
 					<!-- Run shade goal on package phase -->
 					<execution>
@@ -77,8 +81,17 @@ Tools used :
 ### Review It
 	➜  mvn_uber_jar git:(master) ✗ jar tf target/webserver.jar
 
-## Netty TimeServer Sample(com.li3huo.service)
+## 3. Run Uber-Jar Project: Netty TimeServer Sample(com.li3huo.service)
 * [User guide for 4.x](http://netty.io/wiki/user-guide-for-4.x.html)
+
+### Print App Version
+
+	➜  mvn_uber_jar git:(master) ✗ java -jar target/webserver.jar -version
+	18:16:13.023 App [main] Server Vendor:	com.li3huo.maven
+	18:16:13.025 App [main] Server Version:	1.0
+	18:16:13.025 App [main] SCM Tag:	master
+	18:16:13.025 App [main] SCM Version:	8de01
+	18:16:13.025 App [main] Build Number:	22
 
 ### Start time server
 
