@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<properties>
+		<!-- 日志输出位置,从pom文件中获取该值 -->
+		<property name="log_dir">logs</property>
+		<property name="event_level">DEBUG</property>
+	</properties>
+	<Appenders>
+		<!-- 控制台日志输出 -->
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} %c{1} [%t] %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Root level="${event_level}">
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+</Configuration>

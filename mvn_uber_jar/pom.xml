@@ -20,6 +20,13 @@
 		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 	</properties>
 
+	<scm>
+		<connection>scm:git:https://github.com/twotwo/framework-java.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/twotwo/framework-java.git</developerConnection>
+		<url>https://github.com/twotwo/framework-java/tree/master/mvn_uber_jar</url>
+		<tag>HEAD</tag>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -45,7 +52,7 @@
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
-			<version>1.3.1</version>
+			<version>1.4</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
@@ -57,6 +64,15 @@
 	<build>
 		<finalName>webserver</finalName>
 		<sourceDirectory>src/main/java</sourceDirectory>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<!-- add version info to assemble/build.properties -->
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
 		<plugins>
 
 			<!-- Set a compiler level -->
@@ -67,6 +83,27 @@
 				<configuration>
 					<source>${jdk.version}</source>
 					<target>${jdk.version}</target>
+				</configuration>
+			</plugin>
+
+			<!-- generate build number -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<doCheck>false</doCheck>
+					<doUpdate>true</doUpdate>
+					<!-- Git short revision ID -->
+					<shortRevisionLength>5</shortRevisionLength>
 				</configuration>
 			</plugin>
 
