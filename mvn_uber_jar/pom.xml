@@ -12,8 +12,12 @@
 
 	<properties>
 		<jdk.version>1.7</jdk.version>
+		<netty.version>4.1.8.Final</netty.version>
 		<junit.version>4.12</junit.version>
-		<log4j.version>2.7</log4j.version>
+		<log4j.version>2.8.2</log4j.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 	</properties>
 
 	<dependencies>
@@ -46,12 +50,13 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>4.1.5.Final</version>
+			<version>${netty.version}</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<finalName>webserver</finalName>
+		<sourceDirectory>src/main/java</sourceDirectory>
 		<plugins>
 
 			<!-- Set a compiler level -->
@@ -69,7 +74,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version>
+				<version>3.0.0</version>
 				<executions>
 					<!-- Run shade goal on package phase -->
 					<execution>
@@ -78,7 +83,27 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<!-- don't create a temporary file named dependency-reduced-pom.xml -->
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<!-- remove unused class on building -->
 							<minimizeJar>true</minimizeJar>
+							<!-- http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html -->
+							<filters>
+								<filter>
+									<artifact>org.apache.logging.log4j:log4j-api</artifact>
+									<includes>
+										<include>org/apache/logging/log4j/**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.apache.logging.log4j:log4j-core</artifact>
+									<includes>
+										<include>META-INF/log4j-provider.properties</include>
+										<include>org/apache/logging/log4j/core/**</include>
+									</includes>
+								</filter>
+							</filters>
+							<!-- http://maven.apache.org/plugins/maven-shade-plugin/examples/executable-jar.html -->
 							<transformers>
 								<!-- add Main-Class to manifest file -->
 								<transformer
