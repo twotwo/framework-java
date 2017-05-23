@@ -1,5 +1,8 @@
 # Jedis Demo
 
+## Reference
+ * [Jedis](https://github.com/xetorthio/jedis)
+
 ## Create Project
 
 	➜  framework-java git:(master) ✗ mvn -B archetype:generate    \

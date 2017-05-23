@@ -7,7 +7,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>A custom project</name>
+	<name>A Jedis Demo</name>
 	<url>http://li3huo.com</url>
 
 	<properties>
@@ -43,5 +43,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<artifactId>commons-cli</artifactId>
 		<version>1.3.1</version>
 	</dependency>
+	
+	<dependency>
+		<groupId>redis.clients</groupId>
+		<artifactId>jedis</artifactId>
+		<version>2.9.0</version>
+	</dependency>
+	
 	</dependencies>
 </project>
