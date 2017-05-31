@@ -1,0 +1,11 @@
+{
+  "appid": "500006",
+  "channelData": {
+    "checkTokenUrl": "http://ngsdk.d.cn/api/cp/checkToken",
+    "nickname": "d2ed1n5ed9",
+    "token": "A1C95019D79744A78E759DC57470C37C",
+    "umid": "3699847559539",
+    "username": "d2ed1n5ed9"
+  },
+  "channelId": "DJ"
+}

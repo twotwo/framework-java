@@ -1,0 +1,17 @@
+{
+    "appid": "500006",
+    "channelId": "VV",
+    "orderData": {
+        "appId": "afe523c5b6866ae12ba2d5d84c012c49",
+        "cpId": "20140521210220429444",
+        "cpOrderNumber": "222222",
+        "extInfo": "透传参数",
+        "notifyUrl": "http://172.16.60.29:8000/api/PayNotify/VV/500006/",
+        "orderAmount": "1",
+        "orderDesc": "伊泽瑞尔",
+        "orderTime": "20170324184453",
+        "orderTitle": "英雄",
+        "signMethod": "MD5",
+        "version": "1.0.0"
+    }
+}

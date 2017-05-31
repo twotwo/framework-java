@@ -1,0 +1,16 @@
+{
+    "appid": "500006",
+    "channelData": {
+        "data": {
+            "access_token": "28463836416d2f9da3b8f1fbd2285705789bddc669f79339bc",
+            "expires_in": "36000",
+            "refresh_token": "",
+            "scope": "",
+            "server_code": "b",
+            "state": "test_state111"
+        },
+        "errno": 0,
+        "server_code": "b"
+    },
+    "channelId": "360"
+}

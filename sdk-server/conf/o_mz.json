@@ -1,0 +1,21 @@
+{
+  "appid": "500006",
+  "channelId": "mz",
+  "code": 0,
+  "orderData": {
+    "product_body": "皮肤",
+    "product_subject": "购买皮肤",
+    "total_price": "1",
+    "create_time": 1490089327438,
+    "buy_amount": 1,
+    "product_unit": "",
+    "uid": "138258487",
+    "user_info": "透传参数",
+    "cp_order_id": "222222222222",
+    "product_id": "0",
+    "signType": "md5",
+    "pay_type": 0,
+    "product_per_price": "1",
+    "app_id": "3161635",
+  }
+}

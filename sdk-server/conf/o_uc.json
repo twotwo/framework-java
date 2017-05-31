@@ -1,0 +1,17 @@
+{
+    "appid": "500006",
+    "orderData": {
+        "accountId": "a9f9ac9bec4eb1ee17f7d6bb15f3c9a7",
+        "amount": "0.01",
+        "callbackInfo": "cp自定义信息",
+        "cpOrderId": "2222222222222222222",
+        "grade": "14",
+        "notifyUrl": "http://172.16.60.29:8000/api/PayNotify/UC/500006/",
+        "roleId": "11",
+        "roleName": "赏金猎人",
+        "signType": "MD5"
+    },
+    "channelId": "UC",
+    "code":0,
+    "msg":""
+}
