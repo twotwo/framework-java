@@ -29,7 +29,7 @@ Netty提供的功能包括：
 
 3.丰富的example，帮助开发者快速上手和理解
 
-<img src#"https://netty.io/download/Main/WebHome/architecture.png" >
+<img src="https://netty.io/download/Main/WebHome/architecture.png" />
 
 [netty on github](https://github.com/netty/netty)
 

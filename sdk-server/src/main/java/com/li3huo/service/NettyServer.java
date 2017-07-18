@@ -77,13 +77,13 @@ public class NettyServer {
 					}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
 
 			// Bind and start to accept incoming connections.
+			logger.debug("trying to listen on port "+port);
 			ChannelFuture f = b.bind(port).sync();
+			logger.warn("started and listen on " + f.channel().localAddress());
 
 			// Wait until the server socket is closed.
-			// In this example, this does not happen, but you can do that to
-			// gracefully
-			// shut down your server.
 			f.channel().closeFuture().sync();
+			logger.debug("socket is closed");
 		} finally {
 			workerGroup.shutdownGracefully();
 			bossGroup.shutdownGracefully();
